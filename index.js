@@ -5,7 +5,6 @@ const StatusCodes = require('http-status-codes').StatusCodes
 const package_info = require('./package.json')
 const user_fs = require("./user_fs")
 const secure_validate = require("./security_and_validation")
-const {json} = require("express");
 
 const app = express()
 let  port = 2718
@@ -152,6 +151,43 @@ async function delete_admin_message(req, res) {
 
 
 async function login_user(req, res) {
+    // No authentication needed
+    //Validations
+    if (!req.body.hasOwnProperty('email') ||
+        !req.body.hasOwnProperty('password')) 
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Missing information."})
+    }
+    else if(!secure_validate.is_email_valid(req.body.email) ||
+            !secure_validate.is_password_valid(req.body.password) ||
+            (!await user_fs.is_email_exist(req.body.email))) 
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Invalid email or password."})
+    }
+    else
+    {   //check for if found
+        const user = await user_fs.find_user_by_email(req.body.email) 
+
+        if (!secure_validate.verify_user_password(user, req.body.password))
+        {
+            res.status(StatusCodes.BAD_REQUEST)
+            res.json({error: "Invalid email or password."})
+        }
+        else if (secure_validate.verify_user_password(user, req.body.password) &&
+                (user.u_status === "deleted" || user.u_status === "suspended"))
+        {
+            res.status(StatusCodes.UNAUTHORIZED)
+            res.json({error: "Account was suspended or deleted."})
+        }
+        else
+        {
+            const res_user = { token: "OK" } //TODO retunr TOKEN not PASSWORD!!!!
+            res.status(StatusCodes.OK)
+            res.json(res_user)
+        }
+    }
 
 }
 

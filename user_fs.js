@@ -80,6 +80,19 @@ async function find_user(user_id) {
         })
 }
 
+async function find_user_by_email(email) {
+    return await fs.readFile(db_file)
+        .then(res => {
+            let db_json = JSON.parse(res.toString('utf-8'))
+            return db_json.users.find(user => {
+                return user.email === email
+             })
+        })
+        .catch(err => {
+            console.log("Can't parse db")
+        })
+}
+
 async function add_user(user)
 {
     return await fs.readFile(db_file)
@@ -95,6 +108,7 @@ async function add_user(user)
             console.log("Can't parse db")
         })
 }
+
 async function add_message(sender_user, receiver_user, message)
 {
     await fs.readFile(db_file)
@@ -176,5 +190,5 @@ async function is_email_exist(email){
 }
 
 module.exports = {
-    initialize_db, get_users, add_user, add_message, add_post, find_user, is_email_exist
+    initialize_db, get_users, add_user, add_message, add_post, find_user, find_user_by_email,is_email_exist
 }
