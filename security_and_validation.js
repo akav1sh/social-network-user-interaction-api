@@ -38,11 +38,33 @@ function is_email_valid(email)
     return re.test(email)
 }
 
+function verify_status_update(user, new_status)
+{
+    switch (user.u_status)
+    {
+        case "created":
+            if(new_status !== "created")
+                return true
+            break
+        case "suspended":
+            if(new_status !== "suspended" || new_status !== "created")
+                return true
+            break
+        case "active":
+            if(new_status !== "created" || new_status !== "active")
+                return true
+            break
+        default:
+            return false
+    }
+}
+
 function is_user_status_valid(u_status)
 {
     return !(u_status !== "active" || u_status !== "deleted" || u_status !== "deleted");
 }
 
 module.exports = {
-    make_hash_password, verify_user_password, is_password_valid, is_email_valid, is_id_valid, is_user_status_valid
+    make_hash_password, verify_user_password, is_password_valid, is_email_valid, is_id_valid, is_user_status_valid,
+    verify_status_update
 }

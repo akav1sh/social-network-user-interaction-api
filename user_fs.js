@@ -204,5 +204,6 @@ async function is_email_exist(email){
 }
 
 module.exports = {
-    initialize_db, get_users, add_user, add_message, add_post, find_user_by_id, find_user_by_email , is_email_exist
+    initialize_db, get_users, add_user, add_message, add_post, find_user_by_id, find_user_by_email , is_email_exist,
+    update_user_status
 }

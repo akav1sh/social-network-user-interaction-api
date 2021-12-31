@@ -112,7 +112,7 @@ async function create_user( req, res )
 
 async function update_user( req, res )
 {
-    // Authentication needed (check if admin)
+    // Authentication needed (check if admin and req.body.u_id !== 0)
 
     //Validation
     if(!req.body.hasOwnProperty("u_id") ||
@@ -129,7 +129,7 @@ async function update_user( req, res )
     }
     else
     {
-        const user = find_user_by_id()
+        const user = user_fs.find_user_by_id(req.body.u_id)
         if(user === undefined)
         {
             res.status(StatusCodes.NOT_FOUND)
@@ -137,7 +137,18 @@ async function update_user( req, res )
         }
         else
         {
-
+            if(secure_validate.verify_status_update(user, req.body.u_status))
+            {
+                const { u_id, u_status } = user_fs.update_user_status(user.u_id, req.body.u_status)
+                const res_user = { u_id, u_status }
+                res.status(StatusCodes.OK)
+                res.json(res_user)
+            }
+            else
+            {
+                res.status(StatusCodes.CONFLICT)
+                res.json({error: "This user cannot be updated with this status."})
+            }
         }
     }
 }
