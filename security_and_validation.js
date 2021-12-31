@@ -19,16 +19,30 @@ function verify_user_password(user, password)
     return timingSafeEqual(hashedBuffer, keyBuffer);
 }
 
-function is_password_valid(password){
+function is_id_valid(id_type, id)
+{
+    const re = new RegExp(`^[${id_type}]\\d+$`)
+    return !(id.charAt(0) !== id_type || !re.test(id))
+
+}
+
+function is_password_valid(password)
+{
     const re = new RegExp("^(?=.*[^a-zA-Z])(?=.*[a-z])(?=.*[A-Z])\\S{8,}$")
     return re.test(password)
 }
 
-function is_email_valid(email){
-    const re = new RegExp("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$")
+function is_email_valid(email)
+{
+    const re = new RegExp("^\\w+([.-]?\\w+)*@\\w+([.-]?\\w+)*(\\.\\w{2,3})+$")
     return re.test(email)
 }
 
+function is_user_status_valid(u_status)
+{
+    return !(u_status !== "active" || u_status !== "deleted" || u_status !== "deleted");
+}
+
 module.exports = {
-    make_hash_password, verify_user_password, is_password_valid, is_email_valid
+    make_hash_password, verify_user_password, is_password_valid, is_email_valid, is_id_valid, is_user_status_valid
 }

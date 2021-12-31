@@ -5,11 +5,14 @@ const StatusCodes = require('http-status-codes').StatusCodes
 const package_info = require('./package.json')
 const user_fs = require("./user_fs")
 const secure_validate = require("./security_and_validation")
-const {json} = require("express");
+const {find_user_by_id} = require("./user_fs");
 
 const app = express()
 let  port = 2718
 
+const user_type = '3'
+const post_type = '7'
+const message_type = '9'
 
 // General app settings
 const set_content_type = function (req, res, next)
@@ -100,8 +103,8 @@ async function create_user( req, res )
             messages: []
         }
         const id = await user_fs.add_user(new_user) // Add new user to DB
-        // const res_user  = await user_fs.find_user(id) // Find it in the DB to check it was saved correctly
-        const { u_id, u_status, time }  = await user_fs.find_user(id) // Find it in the DB to check it was saved correctly
+        // const res_user  = await user_fs.find_user_by_id(id) // Find it in the DB to check it was saved correctly
+        const { u_id, u_status, time }  = await user_fs.find_user_by_id(id) // Find it in the DB to check it was saved correctly
         const res_user = { u_id, u_status, time }
         res.status(StatusCodes.OK)
         res.json(res_user)
@@ -110,36 +113,34 @@ async function create_user( req, res )
 
 async function update_user( req, res )
 {
-    const id =  parseInt( req.params.id )
+    // Authentication needed (check if admin)
 
-    if ( id <= 0)
+    //Validation
+    if(!req.body.hasOwnProperty("u_id") ||
+       !req.body.hasOwnProperty("u_status"))
     {
-        res.status( StatusCodes.BAD_REQUEST )
-        res.send( "Bad id given")
-        return
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Missing information."})
     }
-
-    const idx =  g_users.findIndex( user =>  user.id == id )
-    if ( idx < 0 )
+    else if(!secure_validate.is_id_valid(user_type, req.body.u_id) ||
+            !secure_validate.is_user_status_valid(req.body.u_status))
     {
-        res.status( StatusCodes.NOT_FOUND )
-        res.send( "No such user")
-        return
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Invalid u_id or u_status."})
     }
-
-    const name = req.body.name
-
-    if ( !name)
+    else
     {
-        res.status( StatusCodes.BAD_REQUEST )
-        res.send( "Missing name in request")
-        return
+        const user = find_user_by_id()
+        if(user === undefined)
+        {
+            res.status(StatusCodes.NOT_FOUND)
+            res.json({error: "User not found."})
+        }
+        else
+        {
+
+        }
     }
-
-    const user = g_users[idx]
-    user.name = name
-
-    res.send(  JSON.stringify( {user}) )
 }
 
 async function send_admin_message(req, res) {
@@ -149,7 +150,6 @@ async function send_admin_message(req, res) {
 async function delete_admin_message(req, res) {
 
 }
-
 
 async function login_user(req, res) {
 
@@ -204,7 +204,7 @@ app.use('/api',router)
 user_fs.initialize_db(`./`).then(async res => {
     // user_fs.add_post({id: 3000}, "LOVE YOU!")
     // console.log(await user_fs.get_users())
-    // console.log(await user_fs.find_user(0))
+    // console.log(await user_fs.find_user_by_id(0))
     let msg = `${package_info.description} listening at port ${port}`
     app.listen(port, () => { console.log( msg )  })
 
