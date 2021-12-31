@@ -44,32 +44,38 @@ async function list_users( req, res)
 
 async function delete_user( req, res )
 {
-    const id =  parseInt( req.params.id )
-
-    if ( id <= 0)
+    // YES Authentication needed!
+    // Validations
+    if (!req.body.hasOwnProperty('password'))
     {
-        res.status( StatusCodes.BAD_REQUEST )
-        res.send( "Bad id given")
-        return
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Missing information."})
     }
-
-    if ( id == 1)
+    else
     {
-        res.status( StatusCodes.FORBIDDEN ) // Forbidden
-        res.send( "Can't delete root user")
-        return
-    }
+        //Need to check token, get user id and compare passwords 
+        //Check user id is != 0 (admin can't delete self)
+        u_id = "30"
+        user = user_fs.find_user_by_id(u_id)
 
-    const idx =  g_users.findIndex( user =>  user.id == id )
-    if ( idx < 0 )
-    {
-        res.status( StatusCodes.NOT_FOUND )
-        res.send( "No such user")
-        return
+        if (false)//(if passwords don't match bad request)
+        {
+            res.status(StatusCodes.UNAUTHORIZED)
+            res.json({error: "Invalid password."})
+        }
+        else if (!secure_validate.verify_status_update(user, "deleted"))
+        {
+            res.status(StatusCodes.CONFLICT)
+            res.json({error: "This user cannot be updated with this status."})
+        }
+        else
+        {
+            await user_fs.update_user_status(u_id, "deleted")
+            const res_user = {u_id: u_id, u_status: "deleted"}
+            res.status(StatusCodes.OK)
+            res.json(res_user)
+        }
     }
-
-    g_users.splice( idx, 1 )
-    res.send(  JSON.stringify( {}) )
 }
 
 async function create_user( req, res )
@@ -112,11 +118,12 @@ async function create_user( req, res )
 
 async function update_user( req, res )
 {
+
     // Authentication needed (check if admin)
 
     //Validation
     if(!req.body.hasOwnProperty("u_id") ||
-       !req.body.hasOwnProperty("u_status"))
+        !req.body.hasOwnProperty("u_status"))
     {
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Missing information."})
@@ -150,36 +157,39 @@ async function delete_admin_message(req, res) {
 
 }
 
+
 async function login_user(req, res) {
     // No authentication needed
     //Validations
     if (!req.body.hasOwnProperty('email') ||
-        !req.body.hasOwnProperty('password'))
+        !req.body.hasOwnProperty('password')) 
     {
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Missing information."})
     }
-    else if(!secure_validate.is_email_valid(req.body.email) ||
-            !secure_validate.is_password_valid(req.body.password) ||
-            (!await user_fs.is_email_exist(req.body.email)))
+    else if (!await user_fs.is_email_exist(req.body.email))
     {
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Invalid email or password."})
     }
     else
     {   //check for if found
-        const user = await user_fs.find_user_by_email(req.body.email)
+        const user = await user_fs.find_user_by_email(req.body.email) 
 
         if (!secure_validate.verify_user_password(user, req.body.password))
         {
             res.status(StatusCodes.BAD_REQUEST)
             res.json({error: "Invalid email or password."})
         }
-        else if (secure_validate.verify_user_password(user, req.body.password) &&
-                (user.u_status === "deleted" || user.u_status === "suspended"))
+        else if (user.u_status === "deleted" || user.u_status === "suspended")
         {
             res.status(StatusCodes.UNAUTHORIZED)
             res.json({error: "Account was suspended or deleted."})
+        }
+        else if (user.u_status === "created")
+        {
+            res.status(StatusCodes.UNAUTHORIZED)
+            res.json({error: "This account has not yet been activated."})
         }
         else
         {
