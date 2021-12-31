@@ -1,3 +1,4 @@
+
 const fs = require("fs").promises
 
 let db_file
@@ -31,6 +32,22 @@ async function initialize_db(path)
         if(await exists(path + "db"))
         {
             console.log("DB file already exists, not creating a new one!")
+            await fs.readFile(path + "db")
+                .then(res => {
+                    const db_json = JSON.parse(res.toString('utf-8'))
+                    current_user_id = db_json.users.reduce((max_id, user) => {
+                        return max_id >= user.u_id ? max_id : user.u_id
+                    }, '30')
+                    console.log(current_user_id)
+                    current_post_id = db_json.users.posts.reduce((max_id, post) => {
+                        return max_id >= post.p_id ? max_id : post.p_id
+                    }, '70')
+                    console.log(current_user_id)
+                    current_message_id = db_json.users.messages.reduce((max_id, message) => {
+                        return max_id >= message.m_id ? max_id : message.m_id
+                    }, '90')
+                })
+                .catch(err => {console.log(`Can't parse db, error: ${err}`)})
         }
         else
         {
@@ -38,13 +55,14 @@ async function initialize_db(path)
             console.log("DB file is missing, creating a new one.")
             await fs.writeFile(path + "db", JSON.stringify({
                 users: [{
-                    u_id: 0,
+                    u_id: '0',
                     name: 'Root',
                     email: "root@mta.ac.il",
                     u_status: "active",
                     password: undefined,
                     posts: [],
-                    messages: []
+                    messages: [],
+                    time: new Date().toJSON()
             }]}))
             console.log("Done creating the file!")
         }
@@ -62,7 +80,15 @@ async function initialize_db(path)
 async function get_users()
 {
     return await fs.readFile(db_file)
-        .then(res => {return JSON.parse(res.toString('utf-8'))})
+        .then(res => {
+            const db_json = JSON.parse(res.toString('utf-8'))
+            return db_json.users.map(user => {
+                delete user.password
+                delete user.messages
+                delete user.time
+                return user
+            })
+        })
         .catch(err => {console.log("Can't parse db")})
 }
 

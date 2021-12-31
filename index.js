@@ -39,7 +39,25 @@ async function get_version( req, res)
 
 async function list_users( req, res)
 {
-    res.send(  JSON.stringify( user_fs.get_users()) )
+    const admin = false
+    // YES Authentication needed!
+
+    const users = await user_fs.get_users()
+    res.status(StatusCodes.OK)
+    //Fix admin or user from TOKEN
+    if(admin === true)
+    {
+        res.json({users: users})
+    }
+    else
+    {
+        res.json({users: users.map(user => {
+            delete user.email
+            delete user.u_status
+            delete user.posts
+            return user
+        })})
+    }
 }
 
 async function delete_user( req, res )
@@ -242,6 +260,7 @@ router.post('/admin/message', async (req, res) => { await send_admin_message(req
 router.delete('/admin/post', async (req, res) => { await delete_admin_message(req, res ) })
 
 router.delete('/user', async (req, res) => { await delete_user(req, res ) })
+router.get('/users', async (req, res) => { await list_users(req, res ) })
 router.post("/user/register", async (req, res) => { await create_user(req, res ) })
 router.post("/user/login", async (req, res) => { await login_user(req, res ) })
 router.post('/user/post', async (req, res) => { await create_user_post(req, res ) })
