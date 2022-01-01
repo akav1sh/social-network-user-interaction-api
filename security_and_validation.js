@@ -2,6 +2,9 @@
 
 const { scryptSync, randomBytes, timingSafeEqual } = require('crypto');
 
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
+
 function make_hash_password(password)
 {
     const salt = randomBytes(16).toString('hex');
@@ -24,6 +27,18 @@ function is_id_valid(id_type, id)
     const re = new RegExp(`^[${id_type}]\\d+$`)
     return !(id.charAt(0) !== id_type || !re.test(id))
 
+}
+
+function create_token(user)
+{
+    const token_info = {id: user.u_id}
+
+    return {token: jwt.sign(token_info, process.env.TOKEN_SECRET)}
+}
+
+function verify_token(token, callback)
+{
+    jwt.verify(token, process.env.TOKEN_SECRET, callback)
 }
 
 function is_password_valid(password)
@@ -66,5 +81,5 @@ function is_user_status_valid(u_status)
 
 module.exports = {
     make_hash_password, verify_user_password, is_password_valid, is_email_valid, is_id_valid, is_user_status_valid,
-    verify_status_update
+    verify_status_update, create_token, verify_token
 }

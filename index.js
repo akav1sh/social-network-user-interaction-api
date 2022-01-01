@@ -220,9 +220,9 @@ async function login_user(req, res) {
         }
         else
         {
-            const res_user = { token: "OK" } //TODO retunr TOKEN not PASSWORD!!!!
+            const res_token = secure_validate.create_token(user)
             res.status(StatusCodes.OK)
-            res.json(res_user)
+            res.json(res_token)
         }
     }
 
@@ -248,26 +248,39 @@ async function send_user_message(req, res) {
 
 }
 
+function authenticateToken(req, res, next)
+{
+    const authHeader = req.headers["authorization"]
+    const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) return res.sendStatus(StatusCodes.UNAUTHORIZED)
+
+    secure_validate.verify_token(token, (err, info) => {
+        if (err) return res.sendStatus(StatusCodes.FORBIDDEN)
+        req.token_info = info
+        next()
+    })
+}
+
 // Routing
 const router = express.Router()
 
 // TODO maybe connect some admin methods with user and distinguish between them with token.
 router.get('/version', async (req, res) => { await get_version(req, res ) })
 
-router.get('/admin/users', async (req, res) => { await list_users(req, res ) })
-router.put('/admin/status', async (req, res) => { await update_user(req, res ) })
-router.post('/admin/message', async (req, res) => { await send_admin_message(req, res ) })
-router.delete('/admin/post', async (req, res) => { await delete_admin_message(req, res ) })
+router.get('/admin/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
+router.put('/admin/status', authenticateToken, async (req, res) => { await update_user(req, res ) })
+router.post('/admin/message', authenticateToken, async (req, res) => { await send_admin_message(req, res ) })
+router.delete('/admin/post', authenticateToken,async (req, res) => { await delete_admin_message(req, res ) })
 
-router.delete('/user', async (req, res) => { await delete_user(req, res ) })
-router.get('/users', async (req, res) => { await list_users(req, res ) })
+router.delete('/user', authenticateToken, async (req, res) => { await delete_user(req, res ) })
+router.get('/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
 router.post("/user/register", async (req, res) => { await create_user(req, res ) })
 router.post("/user/login", async (req, res) => { await login_user(req, res ) })
-router.post('/user/post', async (req, res) => { await create_user_post(req, res ) })
-router.delete('/user/post', async (req, res) => { await delete_user_post(req, res ) })
-router.get('/user/post', async (req, res) => { await get_user_post(req, res ) })
-router.get('/user/message', async (req, res) => { await get_user_message(req, res ) })
-router.post('/user/message', async (req, res) => { await send_user_message(req, res ) })
+router.post('/user/post', authenticateToken,async (req, res) => { await create_user_post(req, res ) })
+router.delete('/user/post', authenticateToken, async (req, res) => { await delete_user_post(req, res ) })
+router.get('/user/post', authenticateToken, async (req, res) => { await get_user_post(req, res ) })
+router.get('/user/message', authenticateToken, async (req, res) => { await get_user_message(req, res ) })
+router.post('/user/message', authenticateToken, async (req, res) => { await send_user_message(req, res ) })
 
 
 app.use('/api',router)

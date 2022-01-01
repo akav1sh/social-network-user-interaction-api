@@ -59,11 +59,12 @@ async function initialize_db(path)
                     name: 'Root',
                     email: "root@mta.ac.il",
                     u_status: "active",
-                    password: undefined,
+                    password: "213c3e97ec7a9d26a070aaa825005b35:5d52b9239c69b8a2d62700db85a02bbdd7cfd12fee1f8b4c91543fe073fae327661237748920cf310a12840c124a95a091e50c465757401c64239e4841bae33a",
                     posts: [],
                     messages: [],
-                    time: new Date().toJSON()
-            }]}))
+                    time: new Date().toJSON()}],
+                tokens: []
+            }))
             console.log("Done creating the file!")
         }
         db_file = path + "db"
@@ -75,6 +76,16 @@ async function initialize_db(path)
         //TODO add error handling
         throw e
     }
+}
+
+async function add_token()
+{
+
+}
+
+async function remove_token()
+{
+
 }
 
 async function get_users()
