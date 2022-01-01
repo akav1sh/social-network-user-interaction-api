@@ -33,12 +33,12 @@ function create_token(user)
 {
     const token_info = {id: user.u_id}
 
-    return {token: jwt.sign(token_info, process.env.TOKEN_SECRET)}
+    return {token: jwt.sign(token_info, process.env.TOKEN_SECRET, {expiresIn: '10m'})}
 }
 
-function verify_token(token, callback)
+function verify_token(token)
 {
-    jwt.verify(token, process.env.TOKEN_SECRET, callback)
+    return jwt.verify(token, process.env.TOKEN_SECRET)
 }
 
 function is_password_valid(password)

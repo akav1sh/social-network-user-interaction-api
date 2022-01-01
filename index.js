@@ -260,11 +260,13 @@ function authenticateToken(req, res, next)
     const token = authHeader && authHeader.split(' ')[1]
     if (token == null) return res.sendStatus(StatusCodes.UNAUTHORIZED)
 
-    secure_validate.verify_token(token, (err, info) => {
-        if (err) return res.sendStatus(StatusCodes.FORBIDDEN)
-        req.token_info = info
-        next()
-    })
+    try {
+        req.token_info = secure_validate.verify_token(token)
+        next();
+    } catch (err)
+    {
+        res.sendStatus(StatusCodes.FORBIDDEN)
+    }
 }
 
 // Routing

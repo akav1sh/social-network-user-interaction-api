@@ -78,14 +78,46 @@ async function initialize_db(path)
     }
 }
 
-async function add_token()
+async function find_token(received_token)
 {
-
+    return await fs.readFile(db_file)
+        .then(res => {
+            let db_json = JSON.parse(res.toString('utf-8'))
+            // TODO check user_id for mistakes
+            return db_json.tokens.find(token => token === received_token)
+        })
+        .catch(err => {
+            console.log("Can't parse db")
+        })
 }
 
-async function remove_token()
+async function add_token(received_token)
 {
+    return await fs.readFile(db_file)
+        .then(async res => {
+            let db_json = JSON.parse(res.toString('utf-8'))
+            // TODO check user for mistakes
+            db_json.tokens.push(received_token)
+            await fs.writeFile(db_file, JSON.stringify(db_json))
+            return true
+        })
+        .catch(err => {
+            console.log("Can't parse db")
+            return false
+        })
+}
 
+async function remove_token(received_token)
+{
+    return await fs.readFile(db_file)
+        .then(res => {
+            let db_json = JSON.parse(res.toString('utf-8'))
+            // TODO check user_id for mistakes
+            return db_json.tokens.filter(token => token !== received_token)
+        })
+        .catch(err => {
+            console.log("Can't parse db")
+        })
 }
 
 async function get_users()
