@@ -69,14 +69,17 @@ async function delete_user( req, res )
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Missing information."})
     }
+    else if (req.token_info.u_id === '0')
+    {
+        res.status(StatusCodes.FORBIDDEN)
+        res.json({error: "Cannot delete root."})
+    }
     else
     {
-        //Need to check token, get user id and compare passwords
-        //Check user id is != 0 (admin can't delete self)
-        u_id = "30"
+        u_id = req.token_info.u_id
         user = await user_fs.find_user_by_id(u_id)
 
-        if (false)//(if passwords don't match bad request)
+        if (!secure_validate.verify_user_password(user, req.password))
         {
             res.status(StatusCodes.UNAUTHORIZED)
             res.json({error: "Invalid password."})
@@ -99,7 +102,7 @@ async function delete_user( req, res )
 async function create_user( req, res )
 {
     // No authentication needed
-    //Validations
+    // Validations
     if (!req.body.hasOwnProperty('email') ||
         !req.body.hasOwnProperty('password') ||
         !req.body.hasOwnProperty('full_name'))
@@ -126,7 +129,6 @@ async function create_user( req, res )
             messages: []
         }
         const id = await user_fs.add_user(new_user) // Add new user to DB
-        // const res_user  = await user_fs.find_user_by_id(id) // Find it in the DB to check it was saved correctly
         const { u_id, u_status, time }  = await user_fs.find_user_by_id(id) // Find it in the DB to check it was saved correctly
         const res_user = { u_id, u_status, time }
         res.status(StatusCodes.OK)
