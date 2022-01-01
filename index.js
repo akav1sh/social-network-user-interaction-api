@@ -39,6 +39,7 @@ async function get_version( req, res)
 
 async function list_users( req, res)
 {
+    
     res.send(  JSON.stringify( user_fs.get_users()) )
 }
 
@@ -56,7 +57,7 @@ async function delete_user( req, res )
         //Need to check token, get user id and compare passwords
         //Check user id is != 0 (admin can't delete self)
         u_id = "30"
-        user = user_fs.find_user_by_id(u_id)
+        user = await user_fs.find_user_by_id(u_id)
 
         if (false)//(if passwords don't match bad request)
         {
