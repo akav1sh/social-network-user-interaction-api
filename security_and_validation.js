@@ -72,6 +72,8 @@ function verify_status_update(user, new_status)
         default:
             return false
     }
+    
+    return false
 }
 
 function is_user_status_valid(u_status)
