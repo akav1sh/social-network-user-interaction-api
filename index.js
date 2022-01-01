@@ -39,13 +39,13 @@ async function get_version( req, res)
 
 async function list_users( req, res)
 {
-    const admin = false
+    const admin = req.token_info.u_id === '0'
     // YES Authentication needed!
 
     const users = await user_fs.get_users()
     res.status(StatusCodes.OK)
     //Fix admin or user from TOKEN
-    if(admin === true)
+    if(admin)
     {
         res.json({users: users})
     }
@@ -228,6 +228,10 @@ async function login_user(req, res) {
 
 }
 
+async function logout_user(req, res) {
+
+}
+
 async function create_user_post(req, res) {
 
 }
@@ -278,6 +282,7 @@ router.delete('/user', authenticateToken, async (req, res) => { await delete_use
 router.get('/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
 router.post("/user/register", async (req, res) => { await create_user(req, res ) })
 router.post("/user/login", async (req, res) => { await login_user(req, res ) })
+router.post("/user/logout", async (req, res) => { await logout_user(req, res ) })
 router.post('/user/post', authenticateToken,async (req, res) => { await create_user_post(req, res ) })
 router.delete('/user/post', authenticateToken, async (req, res) => { await delete_user_post(req, res ) })
 router.get('/user/post', authenticateToken, async (req, res) => { await get_user_post(req, res ) })

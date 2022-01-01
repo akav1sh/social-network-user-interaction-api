@@ -38,7 +38,7 @@ async function initialize_db(path)
                     current_user_id = db_json.users.reduce((max_id, user) => {
                         return max_id >= user.u_id ? max_id : user.u_id
                     }, '30')
-                    console.log(current_user_id)
+                    console.log(current_user_id) //TODO add check if empty
                     current_post_id = db_json.users.posts.reduce((max_id, post) => {
                         return max_id >= post.p_id ? max_id : post.p_id
                     }, '70')
