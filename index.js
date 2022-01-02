@@ -77,8 +77,8 @@ async function delete_user( req, res )
     }
     else
     {
-        u_id = req.token_info.id
-        user = await user_fs.find_user_by_id(u_id)
+        const u_id = req.token_info.id
+        const user = await user_fs.find_user_by_id(u_id)
 
         if (!secure_validate.verify_user_password(user, req.password))
         {
@@ -137,11 +137,11 @@ async function create_user( req, res )
     }
 }
 
-async function update_user( req, res )
+async function update_user_status( req, res )
 {
     // Authentication needed (check if admin and req.body.u_id !== 0)
 
-    //Validation
+    // Validation
     if(!req.body.hasOwnProperty("u_id") ||
        !req.body.hasOwnProperty("u_status"))
     {
@@ -156,26 +156,30 @@ async function update_user( req, res )
     }
     else
     {
-        const user = await user_fs.find_user_by_id(req.body.u_id)
-        if(user === undefined)
+        const u_id = req.token_info.id
+        const user_to_update = await user_fs.find_user_by_id(req.body.u_id)
+
+        if (u_id !== "0")
+        {
+            res.status(StatusCodes.FORBIDDEN)
+            res.json({error: "Only admin can do this action."})
+        }
+        else if (user_to_update === undefined)
         {
             res.status(StatusCodes.NOT_FOUND)
             res.json({error: "User not found."})
         }
+        else if (!secure_validate.verify_status_update(user_to_update, req.body.u_status))
+        {
+            res.status(StatusCodes.CONFLICT)
+            res.json({error: "This user cannot be updated with this status."})
+        }
         else
         {
-            if(secure_validate.verify_status_update(user, req.body.u_status))
-            {
-                const { u_id, u_status } = await user_fs.update_user_status(user.u_id, req.body.u_status)
-                const res_user = { u_id, u_status }
-                res.status(StatusCodes.OK)
-                res.json(res_user)
-            }
-            else
-            {
-                res.status(StatusCodes.CONFLICT)
-                res.json({error: "This user cannot be updated with this status."})
-            }
+            const { u_id, u_status } = await user_fs.update_user_status(user_to_update.u_id, req.body.u_status)
+            const res_user = { u_id, u_status }
+            res.status(StatusCodes.OK)
+            res.json(res_user)
         }
     }
 }
@@ -233,7 +237,10 @@ async function login_user(req, res) {
 }
 
 async function logout_user(req, res) {
+    // YES authentication needed
 
+    await user_fs.remove_token(req.token)
+    res.status(StatusCodes.OK)
 }
 
 async function create_user_post(req, res) {
@@ -260,6 +267,7 @@ function authenticateToken(req, res, next)
 {
     const authHeader = req.headers["authorization"]
     const token = authHeader && authHeader.split(' ')[1]
+    req.token = token
     if (token == null) return res.sendStatus(StatusCodes.UNAUTHORIZED)
 
     try {
@@ -278,7 +286,7 @@ const router = express.Router()
 router.get('/version', async (req, res) => { await get_version(req, res ) })
 
 router.get('/admin/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
-router.put('/admin/status', authenticateToken, async (req, res) => { await update_user(req, res ) })
+router.put('/admin/status', authenticateToken, async (req, res) => { await update_user_status(req, res ) })
 router.post('/admin/message', authenticateToken, async (req, res) => { await send_admin_message(req, res ) })
 router.delete('/admin/post', authenticateToken,async (req, res) => { await delete_admin_message(req, res ) })
 
