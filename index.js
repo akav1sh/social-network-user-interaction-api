@@ -9,37 +9,29 @@ const secure_validate = require("./security_and_validation")
 const app = express()
 let  port = 2718
 
+const all = "0"
+const admin_id = "1"
 const user_type = '3'
 const post_type = '7'
 const message_type = '9'
 
 // General app settings
-const set_content_type = function (req, res, next)
-{
+const set_content_type = function (req, res, next) {
     res.setHeader("Content-Type", "application/json; charset=utf-8")
     next()
 }
 
 app.use( set_content_type )
 app.use(express.json())  // to support JSON-encoded bodies
-// app.use(express.urlencoded( // to support URL-encoded bodies
-//     {
-//         extended: true
-//     }))
-
-
-
 
 // Version
-async function get_version( req, res)
-{
+async function get_version( req, res) {
     const version_obj = { version: package_info.version, description: package_info.description }
     res.json( version_obj )
 }
 
-async function list_users( req, res)
-{
-    const admin = req.token_info.id === "0"
+async function list_users( req, res) {
+    const admin = req.token_info.id === admin_id
     // YES Authentication needed!
 
     const users = await user_fs.get_users()
@@ -60,8 +52,7 @@ async function list_users( req, res)
     }
 }
 
-async function delete_user( req, res )
-{
+async function delete_user( req, res ) {
     // YES Authentication needed!
     // Validations
     if (!req.body.hasOwnProperty('password'))
@@ -69,7 +60,7 @@ async function delete_user( req, res )
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Missing information."})
     }
-    else if (req.token_info.id === "0")
+    else if (req.token_info.id === admin_id)
     {
         res.status(StatusCodes.FORBIDDEN)
         res.json({error: "Cannot delete root."})
@@ -99,8 +90,7 @@ async function delete_user( req, res )
     }
 }
 
-async function create_user( req, res )
-{
+async function create_user( req, res ) {
     // No authentication needed
     // Validations
     if (!req.body.hasOwnProperty('email') ||
@@ -136,10 +126,8 @@ async function create_user( req, res )
     }
 }
 
-async function update_user_status( req, res )
-{
-    // Authentication needed (check if admin and req.body.u_id !== 0)
-
+async function update_user_status( req, res ) {
+    // YES authentication needed
     // Validation
     if(!req.body.hasOwnProperty("u_id") ||
        !req.body.hasOwnProperty("u_status"))
@@ -158,7 +146,7 @@ async function update_user_status( req, res )
         const u_id = req.token_info.id
         const user_to_update = await user_fs.find_user_by_id(req.body.u_id)
 
-        if (u_id !== "0")
+        if (u_id !== admin_id)
         {
             res.status(StatusCodes.FORBIDDEN)
             res.json({error: "Only admin can do this action."})
@@ -185,7 +173,7 @@ async function update_user_status( req, res )
 
 async function login_user(req, res) {
     // No authentication needed
-    //Validations
+    // Validations
     if (!req.body.hasOwnProperty('email') ||
         !req.body.hasOwnProperty('password'))
     {
@@ -236,13 +224,64 @@ async function logout_user(req, res) {
 
 async function create_user_post(req, res) {
 
+    // YES authentication needed
+    // Validation
+    if(!req.body.hasOwnProperty("text"))
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Missing information."})
+    }
+    else
+    {
+        const u_id = req.token_info.id
+        const user = await user_fs.find_user_by_id(u_id)
+        let new_post = {
+            text: req.body.text,
+            time: new Date().toJSON(),
+            p_status: "active"
+        }
+
+        await user_fs.add_post(user, new_post)
+        res.status(StatusCodes.OK)
+        res.json(new_post)
+    }
 }
 
-async function delete_post(req, res) {
+async function delete_user_post(req, res) {
+
 
 }
 
 async function get_user_post(req, res) {
+    // YES authentication needed
+    // Validation
+    if(!req.body.hasOwnProperty("u_id") ||
+        !req.body.hasOwnProperty("post_amount"))
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Missing information."})
+    }
+    else
+    {
+        const u_id = req.body.u_id
+        const post_amount = req.body.post_amount
+        let posts = undefined
+        if (u_id !== all)
+        {
+            const user = await user_fs.find_user_by_id(u_id)
+            posts = user.posts.filter(post => post.p_status === "active")
+        }
+        else
+        {
+            posts = await user_fs.get_posts()
+        }
+
+        if (post_amount !== all)
+                posts = posts.slice(-post_amount)
+
+        res.status(StatusCodes.OK)
+        res.json(posts)
+    }
 
 }
 
@@ -355,7 +394,7 @@ router.post("/user/register", async (req, res) => { await create_user(req, res )
 router.post("/user/login", async (req, res) => { await login_user(req, res ) })
 router.post("/user/logout", authenticateToken, async (req, res) => { await logout_user(req, res ) })
 router.post('/user/post', authenticateToken,async (req, res) => { await create_user_post(req, res ) })
-router.delete('/user/post', authenticateToken, async (req, res) => { await delete_post(req, res ) })
+router.delete('/user/post', authenticateToken, async (req, res) => { await delete_user_post(req, res ) })
 router.get('/user/post', authenticateToken, async (req, res) => { await get_user_post(req, res ) })
 router.get('/user/message', authenticateToken, async (req, res) => { await get_user_message(req, res ) })
 router.post('/user/message', authenticateToken, async (req, res) => { await send_user_message(req, res ) })

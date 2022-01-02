@@ -35,17 +35,12 @@ async function initialize_db(path)
             await fs.readFile(path + "db")
                 .then(res => {
                     const db_json = JSON.parse(res.toString('utf-8'))
-                    current_user_id = db_json.users.reduce((max_id, user) => {
-                        return max_id >= user.u_id ? max_id : user.u_id
-                    }, '30')
+                    current_user_id = db_json.max_u_id
                     console.log(current_user_id) //TODO add check if empty
-                    current_post_id = db_json.users.posts.reduce((max_id, post) => {
-                        return max_id >= post.p_id ? max_id : post.p_id
-                    }, '70')
-                    console.log(current_user_id)
-                    current_message_id = db_json.users.messages.reduce((max_id, message) => {
-                        return max_id >= message.m_id ? max_id : message.m_id
-                    }, '90')
+                    current_post_id = db_json.max_p_id
+                    console.log(current_post_id)
+                    current_message_id = db_json.max_m_id
+                    console.log(current_message_id)
                 })
                 .catch(err => {console.log(`Can't parse db, error: ${err}`)})
         }
@@ -54,6 +49,9 @@ async function initialize_db(path)
             //TODO fix password check if all necessary properties there
             console.log("DB file is missing, creating a new one.")
             await fs.writeFile(path + "db", JSON.stringify({
+                max_u_id: undefined,
+                max_p_id: undefined,
+                max_m_id: undefined,
                 users: [{
                     full_name: "Root",
                     email: "root@mta.ac.il",
@@ -62,7 +60,7 @@ async function initialize_db(path)
                     posts: [],
                     messages: [],
                     time: new Date().toJSON(),
-                    u_id: "0"}],
+                    u_id: "1"}],
 
                 tokens: []
             }))
@@ -138,6 +136,21 @@ async function get_users()
         .catch(err => {console.log("Can't parse db")})
 }
 
+async function get_posts()
+{
+    return await fs.readFile(db_file)
+        .then(res => {
+            const db_json = JSON.parse(res.toString('utf-8'))
+            let all_posts = []
+            db_json.users.forEach(user => {
+                all_posts = all_posts.concat(user.posts)
+            });
+            return all_posts
+
+        })
+        .catch(err => {console.log("Can't parse db")})
+}
+
 async function find_user_by_id(user_id) {
     return await fs.readFile(db_file)
         .then(res => {
@@ -186,6 +199,7 @@ async function add_user(user)
             let db_json = JSON.parse(res.toString('utf-8'))
             // TODO check user for mistakes
             user.u_id = get_new_id("user")
+            db_json.max_u_id = user.u_id
             db_json.users.push(user)
             await fs.writeFile(db_file, JSON.stringify(db_json))
             return user.u_id
@@ -202,6 +216,7 @@ async function add_message(sender, receiver, message)
             let db_json = JSON.parse(res.toString('utf-8'))
             // TODO check users for mistakes
             message.m_id = get_new_id("message")
+            db_json.max_m_id = message.m_id
             db_json.users.forEach(user => {
                 if(user.u_id === sender.u_id || user.u_id === receiver.u_id)
                 {
@@ -247,7 +262,8 @@ async function add_post(poster, post)
             db_json.users.forEach(user => {
                 if(user.u_id === poster.u_id)
                 {
-                    post.u_id = get_new_id("post")
+                    post.p_id = get_new_id("post")
+                    db_json.max_p_id = post.p_id
                     user.posts.push(post)
                 }
             })
@@ -298,6 +314,6 @@ async function is_email_exist(email){
 }
 
 module.exports = {
-    initialize_db, get_users, add_user, add_message, add_broadcast_message, add_post, find_user_by_id, find_user_by_email , is_email_exist,
+    initialize_db, get_users, get_posts, add_user, add_message, add_broadcast_message, add_post, find_user_by_id, find_user_by_email , is_email_exist,
     update_user_status, find_token, add_token, remove_token
 }
