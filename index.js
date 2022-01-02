@@ -39,13 +39,14 @@ async function get_version( req, res)
 
 async function list_users( req, res)
 {
-    const admin = req.token_info.u_id === '0'
+    console.log(req.token_info.id)
+    const admin = req.token_info.id === "0"
     // YES Authentication needed!
 
     const users = await user_fs.get_users()
     res.status(StatusCodes.OK)
     //Fix admin or user from TOKEN
-    if(admin)
+    if (admin)
     {
         res.json({users: users})
     }
@@ -69,14 +70,14 @@ async function delete_user( req, res )
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Missing information."})
     }
-    else if (req.token_info.u_id === '0')
+    else if (req.token_info.id === "0")
     {
         res.status(StatusCodes.FORBIDDEN)
         res.json({error: "Cannot delete root."})
     }
     else
     {
-        u_id = req.token_info.u_id
+        u_id = req.token_info.id
         user = await user_fs.find_user_by_id(u_id)
 
         if (!secure_validate.verify_user_password(user, req.password))
@@ -155,7 +156,7 @@ async function update_user( req, res )
     }
     else
     {
-        const user = user_fs.find_user_by_id(req.body.u_id)
+        const user = await user_fs.find_user_by_id(req.body.u_id)
         if(user === undefined)
         {
             res.status(StatusCodes.NOT_FOUND)
@@ -165,7 +166,7 @@ async function update_user( req, res )
         {
             if(secure_validate.verify_status_update(user, req.body.u_status))
             {
-                const { u_id, u_status } = user_fs.update_user_status(user.u_id, req.body.u_status)
+                const { u_id, u_status } = await user_fs.update_user_status(user.u_id, req.body.u_status)
                 const res_user = { u_id, u_status }
                 res.status(StatusCodes.OK)
                 res.json(res_user)
