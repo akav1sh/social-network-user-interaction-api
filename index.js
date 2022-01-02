@@ -317,7 +317,7 @@ async function admin_broadcast(req, res) {
     else
     {
         const admin = req.token_info.id === admin_id
-        const admin_user = await user_fs.find_user_by_id(admin_id)
+        let admin_user = await user_fs.find_user_by_id(admin_id)
 
         if (admin) {
             let new_message = {
@@ -328,6 +328,7 @@ async function admin_broadcast(req, res) {
                 receiver_id: undefined
             }
             const message_id = await user_fs.add_broadcast_message(admin_user, new_message)
+            admin_user = await user_fs.find_user_by_id(admin_id)
 
             const {m_id, m_status, text, time} = admin_user.messages.find(message => {
                 return message.m_id === message_id
@@ -379,7 +380,7 @@ async function send_user_message(req, res) {
     }
     else
     {
-        const sender = await user_fs.find_user_by_id(req.token_info.id)
+        let sender = await user_fs.find_user_by_id(req.token_info.id)
         const receiver = await user_fs.find_user_by_id(req.body.receiver_id)
         let new_message = {
             text: req.body.text,
@@ -389,11 +390,12 @@ async function send_user_message(req, res) {
             receiver_id: req.body.receiver_id
         }
         const message_id = await user_fs.add_message(sender, receiver, new_message)
+        sender = await user_fs.find_user_by_id(req.token_info.id)
 
-        const {m_id, m_status, text, time} = sender.messages.find(message => {
+        const {receiver_id ,m_id, m_status, text, time} = sender.messages.find(message => {
             return message.m_id === message_id
         })
-        new_message = {m_id, m_status, text, time}
+        new_message = {receiver_id ,m_id, m_status, text, time}
         res.status(StatusCodes.OK)
         res.json(new_message)
     }

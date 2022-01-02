@@ -271,12 +271,11 @@ async function add_broadcast_message(sender, message)
             let db_json = JSON.parse(res.toString('utf-8'))
             // TODO check users for mistakes
             message.m_id = get_new_id("message")
+            db_json.max_m_id = message.m_id
             db_json.users.forEach(user => {
-                if(user.u_id === sender.u_id)
-                {
-                    message.receiver_id = user.u_id
-                    user.messages.push(message)
-                }
+                message = JSON.parse(JSON.stringify(message))
+                message.receiver_id = user.u_id
+                user.messages.push(message)
             })
             await fs.writeFile(db_file, JSON.stringify(db_json))
             return message.m_id
