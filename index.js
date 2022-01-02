@@ -70,7 +70,7 @@ async function delete_user( req, res ) {
         const u_id = req.token_info.id
         const user = await user_fs.find_user_by_id(u_id)
 
-        if (!secure_validate.verify_user_password(user, req.password))
+        if (!secure_validate.verify_user_password(user, req.body.password))
         {
             res.status(StatusCodes.UNAUTHORIZED)
             res.json({error: "Invalid password."})
@@ -223,7 +223,6 @@ async function logout_user(req, res) {
 }
 
 async function create_user_post(req, res) {
-
     // YES authentication needed
     // Validation
     if(!req.body.hasOwnProperty("text"))
@@ -232,7 +231,7 @@ async function create_user_post(req, res) {
         res.json({error: "Missing information."})
     }
     else
-    {
+    {//TODO check post id
         const u_id = req.token_info.id
         const user = await user_fs.find_user_by_id(u_id)
         let new_post = {
@@ -248,7 +247,31 @@ async function create_user_post(req, res) {
 }
 
 async function delete_user_post(req, res) {
+    // YES authentication needed
+    // Validation
+    if(!req.body.hasOwnProperty("p_id"))
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Missing information."})
+    }
+    else
+    {
+        const u_id = req.token_info.id
+        const p_id = req.body.p_id
+        const user = await user_fs.find_user_by_id(u_id)
 
+        if (!user.posts.find(post => post.p_id === p_id)) 
+        {
+            res.status(StatusCodes.NOT_FOUND)
+            res.json({error: "No post with provided id was found."})
+        }
+        else
+        {
+            await user_fs.update_delete_post(u_id, p_id)
+            res.status(StatusCodes.OK)
+            res.json({p_id})
+        }
+    }
 
 }
 
@@ -280,7 +303,7 @@ async function get_user_post(req, res) {
                 posts = posts.slice(-post_amount)
 
         res.status(StatusCodes.OK)
-        res.json(posts)
+        res.json({posts})
     }
 
 }
