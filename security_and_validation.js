@@ -3,6 +3,7 @@
 const { scryptSync, randomBytes, timingSafeEqual } = require('crypto');
 
 const jwt = require("jsonwebtoken")
+const {find_token} = require("./user_fs");
 require("dotenv").config()
 
 function make_hash_password(password)
@@ -38,6 +39,10 @@ function create_token(user)
 
 function verify_token(token)
 {
+    if (!find_token(token))
+    {
+        throw Error("Token expired.")
+    }
     return jwt.verify(token, process.env.TOKEN_SECRET)
 }
 

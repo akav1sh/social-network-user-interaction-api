@@ -112,7 +112,11 @@ async function remove_token(received_token)
         .then(async res => {
             let db_json = JSON.parse(res.toString('utf-8'))
             // TODO check user_id for mistakes
-            await fs.writeFile(db_file, JSON.stringify(db_json.tokens.filter(token => token !== received_token)))
+            if(db_json.tokens.includes(received_token))
+            {
+                db_json.tokens = db_json.tokens.filter(token => token !== received_token)
+                await fs.writeFile(db_file, JSON.stringify(db_json))
+            }
         })
         .catch(err => {
             console.log("Can't parse db")
