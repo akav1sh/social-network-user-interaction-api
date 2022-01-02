@@ -62,11 +62,11 @@ function verify_status_update(user, new_status)
                 return true
             break
         case "suspended":
-            if(new_status !== "suspended" || new_status !== "created")
+            if(new_status !== "suspended" && new_status !== "created")
                 return true
             break
         case "active":
-            if(new_status !== "created" || new_status !== "active")
+            if(new_status !== "created" && new_status !== "active")
                 return true
             break
         default:
@@ -78,7 +78,7 @@ function verify_status_update(user, new_status)
 
 function is_user_status_valid(u_status)
 {
-    return !(u_status !== "active" || u_status !== "deleted" || u_status !== "deleted");
+    return u_status === "active" || u_status === "deleted" || u_status === "suspended"
 }
 
 module.exports = {
