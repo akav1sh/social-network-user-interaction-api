@@ -120,7 +120,7 @@ async function create_user( req, res )
     else
     {
         let new_user = {
-            name: req.body.full_name,
+            full_name: req.body.full_name,
             email: req.body.email,
             u_status: "created",
             password: secure_validate.make_hash_password(req.body.password),
@@ -262,7 +262,7 @@ function authenticateToken(req, res, next)
 
     try {
         req.token_info = secure_validate.verify_token(token)
-        next();
+        next()
     } catch (err)
     {
         res.sendStatus(StatusCodes.FORBIDDEN)

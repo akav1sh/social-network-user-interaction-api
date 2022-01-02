@@ -55,14 +55,15 @@ async function initialize_db(path)
             console.log("DB file is missing, creating a new one.")
             await fs.writeFile(path + "db", JSON.stringify({
                 users: [{
-                    u_id: '0',
-                    name: 'Root',
+                    full_name: "Root",
                     email: "root@mta.ac.il",
                     u_status: "active",
                     password: "213c3e97ec7a9d26a070aaa825005b35:5d52b9239c69b8a2d62700db85a02bbdd7cfd12fee1f8b4c91543fe073fae327661237748920cf310a12840c124a95a091e50c465757401c64239e4841bae33a",
                     posts: [],
                     messages: [],
-                    time: new Date().toJSON()}],
+                    time: new Date().toJSON(),
+                    u_id: "0"}],
+
                 tokens: []
             }))
             console.log("Done creating the file!")
@@ -84,7 +85,7 @@ async function find_token(received_token)
         .then(res => {
             let db_json = JSON.parse(res.toString('utf-8'))
             // TODO check user_id for mistakes
-            return db_json.tokens.find(token => token === received_token)
+            return db_json.tokens.includes(received_token)
         })
         .catch(err => {
             console.log("Can't parse db")
@@ -99,21 +100,19 @@ async function add_token(received_token)
             // TODO check user for mistakes
             db_json.tokens.push(received_token)
             await fs.writeFile(db_file, JSON.stringify(db_json))
-            return true
         })
         .catch(err => {
             console.log("Can't parse db")
-            return false
         })
 }
 
 async function remove_token(received_token)
 {
     return await fs.readFile(db_file)
-        .then(res => {
+        .then(async res => {
             let db_json = JSON.parse(res.toString('utf-8'))
             // TODO check user_id for mistakes
-            return db_json.tokens.filter(token => token !== received_token)
+            await fs.writeFile(db_file, JSON.stringify(db_json.tokens.filter(token => token !== received_token)))
         })
         .catch(err => {
             console.log("Can't parse db")
