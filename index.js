@@ -320,13 +320,31 @@ async function admin_broadcast(req, res) {
 }
 
 async function get_user_message(req, res) {
-    !secure_validate.is_message_status_valid(req.body.m_status)
+    if (!req.body.hasOwnProperty('sender_id') ||
+        !req.body.hasOwnProperty('m_status'))
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Missing information."})
+    }
+    else if (!secure_validate.is_id_valid(user_type, req.body.sender_id) ||
+             !secure_validate.is_message_status_valid(req.body.m_status))
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Invalid sender_id or m_status."})
+    }
+    else
+    {
+        const messages = await user_fs.get_messages(req.token_info.id, req.body.sender_id, req.body.m_status)
+        res.status(StatusCodes.OK)
+        res.json({messages: messages})
+
+    }
+
 }
 
 async function send_user_message(req, res) {
     if (!req.body.hasOwnProperty('text') ||
-        !req.body.hasOwnProperty('receiver_id') ||
-        !req.body.hasOwnProperty('m_status'))
+        !req.body.hasOwnProperty('receiver_id'))
     {
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Missing information."})
