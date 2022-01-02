@@ -179,6 +179,22 @@ async function update_user_status(user_id, new_status)
         })
 }
 
+async function update_delete_post(user_id, post_id)
+{
+    return await fs.readFile(db_file)
+        .then(async res => {
+            let db_json = JSON.parse(res.toString('utf-8'))
+            // TODO check user for mistakes
+            const user = db_json.users.find(user => user.u_id === user_id)
+            const post = user.posts.find(post => post.p_id === post_id )
+            post.p_status = "deleted"
+            await fs.writeFile(db_file, JSON.stringify(db_json))
+        })
+        .catch(err => {
+            console.log("Can't parse db")
+        })
+}
+
 async function find_user_by_email(email) {
     return await fs.readFile(db_file)
         .then(res => {
@@ -315,5 +331,5 @@ async function is_email_exist(email){
 
 module.exports = {
     initialize_db, get_users, get_posts, add_user, add_message, add_broadcast_message, add_post, find_user_by_id, find_user_by_email , is_email_exist,
-    update_user_status, find_token, add_token, remove_token
+    update_user_status, update_delete_post, find_token, add_token, remove_token
 }
