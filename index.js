@@ -34,12 +34,11 @@ app.use(express.json())  // to support JSON-encoded bodies
 async function get_version( req, res)
 {
     const version_obj = { version: package_info.version, description: package_info.description }
-    res.send(  JSON.stringify( version_obj) )
+    res.json( version_obj )
 }
 
 async function list_users( req, res)
 {
-    console.log(req.token_info.id)
     const admin = req.token_info.id === "0"
     // YES Authentication needed!
 
@@ -184,14 +183,6 @@ async function update_user_status( req, res )
     }
 }
 
-async function send_admin_message(req, res) {
-
-}
-
-async function delete_admin_message(req, res) {
-
-}
-
 async function login_user(req, res) {
     // No authentication needed
     //Validations
@@ -247,7 +238,7 @@ async function create_user_post(req, res) {
 
 }
 
-async function delete_user_post(req, res) {
+async function delete_post(req, res) {
 
 }
 
@@ -255,12 +246,77 @@ async function get_user_post(req, res) {
 
 }
 
-async function get_user_message(req, res) {
+async function admin_broadcast(req, res) {
+    if (!req.body.hasOwnProperty('text'))
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Missing information."})
+    }
+    else
+    {
+        const admin = req.token_info.id === admin_id
+        const admin_user = await user_fs.find_user_by_id(admin_id)
 
+        if (admin) {
+            let new_message = {
+                text: req.body.text,
+                m_status: "unread",
+                time: new Date().toJSON(),
+                sender_id: req.token_info.id,
+                receiver_id: undefined
+            }
+            const message_id = await user_fs.add_broadcast_message(admin_user, new_message)
+
+            const {m_id, m_status, text, time} = admin_user.messages.find(message => {
+                return message.m_id === message_id
+            })
+            new_message = {m_id, m_status, text, time}
+            res.status(StatusCodes.OK)
+            res.json(new_message)
+        } else {
+            res.status(StatusCodes.FORBIDDEN)
+            res.json({error: "Forbidden"})
+        }
+    }
+}
+
+async function get_user_message(req, res) {
+    !secure_validate.is_message_status_valid(req.body.m_status)
 }
 
 async function send_user_message(req, res) {
+    if (!req.body.hasOwnProperty('text') ||
+        !req.body.hasOwnProperty('receiver_id') ||
+        !req.body.hasOwnProperty('m_status'))
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Missing information."})
+    }
+    else if (!secure_validate.is_id_valid(user_type, req.body.receiver_id))
+    {
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Invalid receiver_id or m_status."})
+    }
+    else
+    {
+        const sender = await user_fs.find_user_by_id(req.token_info.id)
+        const receiver = await user_fs.find_user_by_id(req.body.receiver_id)
+        let new_message = {
+            text: req.body.text,
+            m_status: "unread",
+            time: new Date().toJSON(),
+            sender_id: req.token_info.id,
+            receiver_id: req.body.receiver_id
+        }
+        const message_id = await user_fs.add_message(sender, receiver, new_message)
 
+        const {m_id, m_status, text, time} = sender.messages.find(message => {
+            return message.m_id === message_id
+        })
+        new_message = {m_id, m_status, text, time}
+        res.status(StatusCodes.OK)
+        res.json(new_message)
+    }
 }
 
 function authenticateToken(req, res, next)
@@ -268,27 +324,30 @@ function authenticateToken(req, res, next)
     const authHeader = req.headers["authorization"]
     const token = authHeader && authHeader.split(' ')[1]
     req.token = token
-    if (token == null) return res.sendStatus(StatusCodes.UNAUTHORIZED)
+    if (token == null)
+    {
+        res.status(StatusCodes.UNAUTHORIZED)
+        return res.json({error: "Forbidden"})
+    }
 
     try {
         req.token_info = secure_validate.verify_token(token)
         next()
     } catch (err)
     {
-        res.sendStatus(StatusCodes.FORBIDDEN)
+        res.status(StatusCodes.FORBIDDEN)
+        res.json({error: "Forbidden"})
     }
 }
 
 // Routing
 const router = express.Router()
 
-// TODO maybe connect some admin methods with user and distinguish between them with token.
 router.get('/version', async (req, res) => { await get_version(req, res ) })
 
 router.get('/admin/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
 router.put('/admin/status', authenticateToken, async (req, res) => { await update_user_status(req, res ) })
-router.post('/admin/message', authenticateToken, async (req, res) => { await send_admin_message(req, res ) })
-router.delete('/admin/post', authenticateToken,async (req, res) => { await delete_admin_message(req, res ) })
+router.post('/admin/broadcast', authenticateToken, async (req, res) => { await admin_broadcast(req, res ) })
 
 router.delete('/user', authenticateToken, async (req, res) => { await delete_user(req, res ) })
 router.get('/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
@@ -296,7 +355,7 @@ router.post("/user/register", async (req, res) => { await create_user(req, res )
 router.post("/user/login", async (req, res) => { await login_user(req, res ) })
 router.post("/user/logout", authenticateToken, async (req, res) => { await logout_user(req, res ) })
 router.post('/user/post', authenticateToken,async (req, res) => { await create_user_post(req, res ) })
-router.delete('/user/post', authenticateToken, async (req, res) => { await delete_user_post(req, res ) })
+router.delete('/user/post', authenticateToken, async (req, res) => { await delete_post(req, res ) })
 router.get('/user/post', authenticateToken, async (req, res) => { await get_user_post(req, res ) })
 router.get('/user/message', authenticateToken, async (req, res) => { await get_user_message(req, res ) })
 router.post('/user/message', authenticateToken, async (req, res) => { await send_user_message(req, res ) })
@@ -308,9 +367,6 @@ app.use('/api',router)
 // Init
 
 user_fs.initialize_db(`./`).then(async res => {
-    // user_fs.add_post({id: 3000}, "LOVE YOU!")
-    // console.log(await user_fs.get_users())
-    // console.log(await user_fs.find_user_by_id(0))
     let msg = `${package_info.description} listening at port ${port}`
     app.listen(port, () => { console.log( msg )  })
 

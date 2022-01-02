@@ -195,26 +195,48 @@ async function add_user(user)
         })
 }
 
-async function add_message(sender_user, receiver_user, message)
+async function add_message(sender, receiver, message)
 {
-    await fs.readFile(db_file)
+    return await fs.readFile(db_file)
         .then(async res => {
             let db_json = JSON.parse(res.toString('utf-8'))
             // TODO check users for mistakes
+            message.m_id = get_new_id("message")
             db_json.users.forEach(user => {
-                if(user.u_id === sender_user.u_id || user.u_id === receiver_user.u_id)
+                if(user.u_id === sender.u_id || user.u_id === receiver.u_id)
                 {
-                    message.m_id = get_new_id("message")
                     user.messages.push(message)
                 }
             })
             await fs.writeFile(db_file, JSON.stringify(db_json))
+            return message.m_id
         })
         .catch(err => {
             console.log("Can't parse db")
         })
 }
 
+async function add_broadcast_message(sender, message)
+{
+    return await fs.readFile(db_file)
+        .then(async res => {
+            let db_json = JSON.parse(res.toString('utf-8'))
+            // TODO check users for mistakes
+            message.m_id = get_new_id("message")
+            db_json.users.forEach(user => {
+                if(user.u_id === sender.u_id)
+                {
+                    message.receiver_id = user.u_id
+                    user.messages.push(message)
+                }
+            })
+            await fs.writeFile(db_file, JSON.stringify(db_json))
+            return message.m_id
+        })
+        .catch(err => {
+            console.log("Can't parse db")
+        })
+}
 
 async function add_post(poster, post)
 {
@@ -276,6 +298,6 @@ async function is_email_exist(email){
 }
 
 module.exports = {
-    initialize_db, get_users, add_user, add_message, add_post, find_user_by_id, find_user_by_email , is_email_exist,
+    initialize_db, get_users, add_user, add_message, add_broadcast_message, add_post, find_user_by_id, find_user_by_email , is_email_exist,
     update_user_status, find_token, add_token, remove_token
 }

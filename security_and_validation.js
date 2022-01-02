@@ -86,7 +86,13 @@ function is_user_status_valid(u_status)
     return u_status === "active" || u_status === "deleted" || u_status === "suspended"
 }
 
+function is_message_status_valid(m_status)
+{
+    return m_status === "read" || m_status === "unread" || m_status === "all"
+
+}
+
 module.exports = {
     make_hash_password, verify_user_password, is_password_valid, is_email_valid, is_id_valid, is_user_status_valid,
-    verify_status_update, create_token, verify_token
+    is_message_status_valid, verify_status_update, create_token, verify_token
 }
