@@ -224,6 +224,7 @@ async function login_user(req, res) {
         else
         {
             const res_token = secure_validate.create_token(user)
+            await user_fs.add_token(res_token.token)
             res.status(StatusCodes.OK)
             res.json(res_token)
         }
@@ -285,7 +286,7 @@ router.delete('/user', authenticateToken, async (req, res) => { await delete_use
 router.get('/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
 router.post("/user/register", async (req, res) => { await create_user(req, res ) })
 router.post("/user/login", async (req, res) => { await login_user(req, res ) })
-router.post("/user/logout", async (req, res) => { await logout_user(req, res ) })
+router.post("/user/logout", authenticateToken, async (req, res) => { await logout_user(req, res ) })
 router.post('/user/post', authenticateToken,async (req, res) => { await create_user_post(req, res ) })
 router.delete('/user/post', authenticateToken, async (req, res) => { await delete_user_post(req, res ) })
 router.get('/user/post', authenticateToken, async (req, res) => { await get_user_post(req, res ) })
