@@ -113,8 +113,8 @@ async function remove_token(received_token)
             if(db_json.tokens.includes(received_token))
             {
                 db_json.tokens = db_json.tokens.filter(token => token !== received_token)
-                await fs.writeFile(db_file, JSON.stringify(db_json))
             }
+            await fs.writeFile(db_file, JSON.stringify(db_json))
         })
         .catch(err => {
             console.log("Can't parse db")
@@ -345,7 +345,17 @@ async function is_email_exist(email){
         })
 }
 
+async function get_tokens(){
+    return fs.readFile(db_file)
+        .then(res => {
+            let db_json = JSON.parse(res.toString('utf-8'))
+            return db_json.tokens
+        }).catch(err => {
+            console.log("Can't parse db")
+        })
+}
+
 module.exports = {
     initialize_db, get_users, get_messages, get_posts, add_user, add_message, add_broadcast_message, add_post, find_user_by_id, find_user_by_email , is_email_exist,
-    update_user_status, update_delete_post, find_token, add_token, remove_token
+    update_user_status, update_delete_post, find_token, add_token, remove_token, get_tokens
 }

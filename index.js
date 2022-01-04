@@ -5,6 +5,7 @@ const StatusCodes = require('http-status-codes').StatusCodes
 const package_info = require('./package.json')
 const user_fs = require("./user_fs")
 const secure_validate = require("./security_and_validation")
+const schedule = require('node-schedule')
 
 const app = express()
 let  port = 2718
@@ -23,6 +24,27 @@ const set_content_type = function (req, res, next) {
 
 app.use( set_content_type )
 app.use(express.json())  // to support JSON-encoded bodies
+
+
+//Repeated function every 10 mins to remove expired tokens
+async function remove_expired_tokens(){
+    let tokens_from_db = await user_fs.get_tokens()
+    if (tokens_from_db)
+    {
+        tokens_from_db = tokens_from_db.filter(token => {
+            try {
+                secure_validate.verify_token(token)
+                return false
+            } catch (err){
+                return true
+            }
+        })
+
+        for(let old_token of tokens_from_db){
+            await user_fs.remove_token(old_token)
+        }
+    }
+}
 
 // Version
 async function get_version( req, res) {
@@ -171,48 +193,45 @@ async function update_user_status( req, res ) {
     }
 }
 
-async function login_user(req, res) {
-    // No authentication needed
-    // Validations
-    if (!req.body.hasOwnProperty('email') ||
-        !req.body.hasOwnProperty('password'))
-    {
-        res.status(StatusCodes.BAD_REQUEST)
-        res.json({error: "Missing information."})
-    }
-    else if (!await user_fs.is_email_exist(req.body.email))
-    {
-        res.status(StatusCodes.BAD_REQUEST)
-        res.json({error: "Invalid email or password."})
-    }
-    else
-    {   //check for if found
-        const user = await user_fs.find_user_by_email(req.body.email)
+async function login_user(req, res,next) {
 
-        if (!secure_validate.verify_user_password(user, req.body.password))
-        {
+    try {
+        // No authentication needed
+        // Validations
+        console.log("BBB")
+        next(error())
+        if (!req.body.hasOwnProperty('email') ||
+            !req.body.hasOwnProperty('password')) {
+            res.status(StatusCodes.BAD_REQUEST)
+            res.json({error: "Missing information."})
+        } else if (!await user_fs.is_email_exist(req.body.email)) {
             res.status(StatusCodes.BAD_REQUEST)
             res.json({error: "Invalid email or password."})
-        }
-        else if (user.u_status === "deleted" || user.u_status === "suspended")
-        {
-            res.status(StatusCodes.UNAUTHORIZED)
-            res.json({error: "Account was suspended or deleted."})
-        }
-        else if (user.u_status === "created")
-        {
-            res.status(StatusCodes.UNAUTHORIZED)
-            res.json({error: "This account has not yet been activated."})
-        }
-        else
-        {
-            const res_token = secure_validate.create_token(user)
-            await user_fs.add_token(res_token.token)
-            res.status(StatusCodes.OK)
-            res.json(res_token)
-        }
-    }
+        } else {   //check for if found
+            const user = await user_fs.find_user_by_email(req.body.email)
 
+            if (!secure_validate.verify_user_password(user, req.body.password)) {
+                res.status(StatusCodes.BAD_REQUEST)
+                res.json({error: "Invalid email or password."})
+            } else if (user.u_status === "deleted" || user.u_status === "suspended") {
+                res.status(StatusCodes.UNAUTHORIZED)
+                res.json({error: "Account was suspended or deleted."})
+            } else if (user.u_status === "created") {
+                res.status(StatusCodes.UNAUTHORIZED)
+                res.json({error: "This account has not yet been activated."})
+            } else {
+                const res_token = secure_validate.create_token(user)
+                await user_fs.add_token(res_token.token)
+                res.status(StatusCodes.OK)
+                res.json(res_token)
+            }
+        }
+    }catch (err)
+    {
+        console.error(err.stack)
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        res.json({error: "Internal Server Error."})
+    }
 }
 
 async function logout_user(req, res) {
@@ -447,6 +466,7 @@ app.use('/api',router)
 
 
 // Init
+schedule.scheduleJob('*/1 * * * *', remove_expired_tokens)
 
 user_fs.initialize_db(`./`).then(async res => {
     let msg = `${package_info.description} listening at port ${port}`
