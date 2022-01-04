@@ -194,13 +194,11 @@ async function update_user_status( req, res ) {
     }
 }
 
-async function login_user(req, res,next) {
+async function login_user(req, res) {
 
     try {
         // No authentication needed
         // Validations
-        console.log("BBB")
-        next(error())
         if (!req.body.hasOwnProperty('email') ||
             !req.body.hasOwnProperty('password')) {
             res.status(StatusCodes.BAD_REQUEST)
