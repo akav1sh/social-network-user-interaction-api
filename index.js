@@ -10,6 +10,7 @@ const schedule = require('node-schedule')
 const app = express()
 let  port = 2718
 
+// For readability - don't use 7 and 9 but here to understand
 const all = "0"
 const admin_id = "1"
 const user_type = '3'
@@ -26,7 +27,7 @@ app.use( set_content_type )
 app.use(express.json())  // to support JSON-encoded bodies
 
 
-//Repeated function every 10 mins to remove expired tokens
+// Repeated function every 10 mins to remove expired tokens
 async function remove_expired_tokens(){
     let tokens_from_db = await user_fs.get_tokens()
     if (tokens_from_db)
@@ -54,11 +55,9 @@ async function get_version( req, res) {
 
 async function list_users( req, res) {
     const admin = req.token_info.id === admin_id
-    // YES Authentication needed!
-
     const users = await user_fs.get_users()
     res.status(StatusCodes.OK)
-    //Fix admin or user from TOKEN
+
     if (admin)
     {
         res.json({users: users})
@@ -75,7 +74,6 @@ async function list_users( req, res) {
 }
 
 async function delete_user( req, res ) {
-    // YES Authentication needed!
     // Validations
     if (!req.body.hasOwnProperty('password'))
     {
@@ -114,7 +112,6 @@ async function delete_user( req, res ) {
 }
 
 async function create_user( req, res ) {
-    // No authentication needed
     // Validations
     if (!req.body.hasOwnProperty('email') ||
         !req.body.hasOwnProperty('password') ||
@@ -150,7 +147,6 @@ async function create_user( req, res ) {
 }
 
 async function update_user_status( req, res ) {
-    // YES authentication needed
     // Validation
     if(!req.body.hasOwnProperty("u_id") ||
        !req.body.hasOwnProperty("u_status"))
@@ -197,35 +193,47 @@ async function update_user_status( req, res ) {
 async function login_user(req, res) {
 
     try {
-        // No authentication needed
         // Validations
         if (!req.body.hasOwnProperty('email') ||
-            !req.body.hasOwnProperty('password')) {
+            !req.body.hasOwnProperty('password')) 
+        {
             res.status(StatusCodes.BAD_REQUEST)
             res.json({error: "Missing information."})
-        } else if (!await user_fs.is_email_exist(req.body.email)) {
+        } 
+        else if (!await user_fs.is_email_exist(req.body.email)) 
+        {
             res.status(StatusCodes.BAD_REQUEST)
             res.json({error: "Invalid email or password."})
-        } else {   //check for if found
+        } 
+        else 
+        { 
             const user = await user_fs.find_user_by_email(req.body.email)
 
-            if (!secure_validate.verify_user_password(user, req.body.password)) {
+            if (!secure_validate.verify_user_password(user, req.body.password)) 
+            {
                 res.status(StatusCodes.BAD_REQUEST)
                 res.json({error: "Invalid email or password."})
-            } else if (user.u_status === "deleted" || user.u_status === "suspended") {
+            } 
+            else if (user.u_status === "deleted" || user.u_status === "suspended") 
+            {
                 res.status(StatusCodes.UNAUTHORIZED)
                 res.json({error: "Account was suspended or deleted."})
-            } else if (user.u_status === "created") {
+            }
+            else if (user.u_status === "created") 
+            {
                 res.status(StatusCodes.UNAUTHORIZED)
                 res.json({error: "This account has not yet been activated."})
-            } else {
+            } 
+            else 
+            {
                 const res_token = secure_validate.create_token(user)
                 await user_fs.add_token(res_token.token)
                 res.status(StatusCodes.OK)
                 res.json(res_token)
             }
         }
-    }catch (err)
+    }
+    catch (err)
     {
         console.error(err.stack)
         res.status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -234,15 +242,12 @@ async function login_user(req, res) {
 }
 
 async function logout_user(req, res) {
-    // YES authentication needed
-
     await user_fs.remove_token(req.token)
     res.status(StatusCodes.OK)
     res.json({})
 }
 
 async function create_user_post(req, res) {
-    // YES authentication needed
     // Validation
     if(!req.body.hasOwnProperty("text"))
     {
@@ -268,7 +273,6 @@ async function create_user_post(req, res) {
 }
 
 async function delete_user_post(req, res) {
-    // YES authentication needed
     // Validation
     if(!req.body.hasOwnProperty("p_id"))
     {
@@ -297,7 +301,6 @@ async function delete_user_post(req, res) {
 }
 
 async function get_user_post(req, res) {
-    // YES authentication needed
     // Validation
     if(!req.body.hasOwnProperty("u_id") ||
         !req.body.hasOwnProperty("post_amount"))
@@ -316,9 +319,7 @@ async function get_user_post(req, res) {
             posts = user.posts.filter(post => post.p_status === "active")
         }
         else
-        {
             posts = await user_fs.get_posts()
-        }
 
         if (post_amount !== all)
                 posts = posts.slice(-post_amount)
@@ -340,7 +341,8 @@ async function admin_broadcast(req, res) {
         const admin = req.token_info.id === admin_id
         let admin_user = await user_fs.find_user_by_id(admin_id)
 
-        if (admin) {
+        if (admin) 
+        {
             let new_message = {
                 text: req.body.text,
                 m_status: "unread",
@@ -357,7 +359,9 @@ async function admin_broadcast(req, res) {
             new_message = {m_id, m_status, text, time}
             res.status(StatusCodes.OK)
             res.json(new_message)
-        } else {
+        } 
+        else 
+        {
             res.status(StatusCodes.FORBIDDEN)
             res.json({error: "Forbidden"})
         }
@@ -394,7 +398,7 @@ async function send_user_message(req, res) {
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Missing information."})
     }
-    else if (!secure_validate.is_id_valid(user_type, req.body.receiver_id))
+    else if (req.body.receiver_id !== admin_id && !secure_validate.is_id_valid(user_type, req.body.receiver_id))
     {
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Invalid receiver_id or m_status."})
@@ -449,12 +453,11 @@ async function authenticateToken(req, res, next)
 // Routing
 const router = express.Router()
 
-router.get('/version', async (req, res) => { await get_version(req, res ) })
+router.post("/ver", async (req, res) => { await get_version(req, res ) })
 
 router.get('/admin/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
 router.put('/admin/status', authenticateToken, async (req, res) => { await update_user_status(req, res ) })
 router.post('/admin/broadcast', authenticateToken, async (req, res) => { await admin_broadcast(req, res ) })
-
 router.delete('/user', authenticateToken, async (req, res) => { await delete_user(req, res ) })
 router.get('/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
 router.post("/user/register", async (req, res) => { await create_user(req, res ) })
@@ -465,7 +468,6 @@ router.delete('/user/post', authenticateToken, async (req, res) => { await delet
 router.get('/user/post', authenticateToken, async (req, res) => { await get_user_post(req, res ) })
 router.get('/user/message', authenticateToken, async (req, res) => { await get_user_message(req, res ) })
 router.post('/user/message', authenticateToken, async (req, res) => { await send_user_message(req, res ) })
-
 
 app.use('/api',router)
 
