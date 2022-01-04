@@ -158,10 +158,11 @@ async function get_messages(requesting_user_id, sender_id, status)
             const db_json = JSON.parse(res.toString('utf-8'))
             const requesting_user = db_json.users.find(user => user.u_id === requesting_user_id)
             // filter sender id to get messages from single user or all if id === "0"
-            const messages = requesting_user.messages
+            let messages = requesting_user.messages
                 .filter(message => message.sender_id === (sender_id !== "0" ? sender_id : message.sender_id))
-                .filter(message => message.m_status === status)
-            messages.forEach(message => message.m_status = "read")
+            if (status !== "all")
+                messages = messages.filter(message => message.m_status === status)
+                messages.forEach(message => message.m_status = "read")
             await fs.writeFile(db_file, JSON.stringify(db_json))
             return messages
         })

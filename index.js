@@ -105,6 +105,7 @@ async function delete_user( req, res ) {
         else
         {
             await user_fs.update_user_status(u_id, "deleted")
+            await user_fs.remove_token(req.token)
             const res_user = {u_id: u_id, u_status: "deleted"}
             res.status(StatusCodes.OK)
             res.json(res_user)
@@ -239,6 +240,7 @@ async function logout_user(req, res) {
 
     await user_fs.remove_token(req.token)
     res.status(StatusCodes.OK)
+    res.json({})
 }
 
 async function create_user_post(req, res) {
@@ -260,8 +262,10 @@ async function create_user_post(req, res) {
         }
 
         await user_fs.add_post(user, new_post)
+        const { p_id, time } = new_post
+        const res_post = { p_id, time }
         res.status(StatusCodes.OK)
-        res.json(new_post)
+        res.json(res_post)
     }
 }
 
@@ -369,8 +373,8 @@ async function get_user_message(req, res) {
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Missing information."})
     }
-    else if (!secure_validate.is_id_valid(user_type, req.body.sender_id) ||
-             !secure_validate.is_message_status_valid(req.body.m_status))
+    else if (!secure_validate.is_message_status_valid(req.body.m_status) ||
+            (req.body.sender_id !== all && req.body.sender_id !== admin_id && !secure_validate.is_id_valid(user_type, req.body.sender_id)))
     {
         res.status(StatusCodes.BAD_REQUEST)
         res.json({error: "Invalid sender_id or m_status."})
@@ -420,7 +424,7 @@ async function send_user_message(req, res) {
     }
 }
 
-function authenticateToken(req, res, next)
+async function authenticateToken(req, res, next)
 {
     const authHeader = req.headers["authorization"]
     const token = authHeader && authHeader.split(' ')[1]
@@ -433,6 +437,9 @@ function authenticateToken(req, res, next)
 
     try {
         req.token_info = secure_validate.verify_token(token)
+        const user = await user_fs.find_user_by_id(req.token_info.id)
+        if (user.u_status !== "active")
+            throw Error("Status is not active.")
         next()
     } catch (err)
     {
