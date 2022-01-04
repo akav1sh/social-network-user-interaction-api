@@ -72,7 +72,6 @@ async function initialize_db(path)
     catch (e)
     {
         console.log(`Error: ${e}`)
-        //TODO add error handling
         throw e
     }
 }
@@ -85,9 +84,6 @@ async function find_token(received_token)
             // TODO check user_id for mistakes
             return db_json.tokens.includes(received_token)
         })
-        .catch(err => {
-            console.log("Can't parse db")
-        })
 }
 
 async function add_token(received_token)
@@ -98,9 +94,6 @@ async function add_token(received_token)
             // TODO check user for mistakes
             db_json.tokens.push(received_token)
             await fs.writeFile(db_file, JSON.stringify(db_json))
-        })
-        .catch(err => {
-            console.log("Can't parse db")
         })
 }
 
@@ -116,9 +109,6 @@ async function remove_token(received_token)
             }
             await fs.writeFile(db_file, JSON.stringify(db_json))
         })
-        .catch(err => {
-            console.log("Can't parse db")
-        })
 }
 
 async function get_users()
@@ -133,7 +123,6 @@ async function get_users()
                 return user
             })
         })
-        .catch(err => {console.log("Can't parse db")})
 }
 
 async function get_posts()
@@ -148,7 +137,6 @@ async function get_posts()
             return all_posts
 
         })
-        .catch(err => {console.log("Can't parse db")})
 }
 
 async function get_messages(requesting_user_id, sender_id, status)
@@ -166,7 +154,6 @@ async function get_messages(requesting_user_id, sender_id, status)
             await fs.writeFile(db_file, JSON.stringify(db_json))
             return messages
         })
-        .catch(err => {console.log("Can't parse db")})
 }
 
 async function find_user_by_id(user_id) {
@@ -175,9 +162,6 @@ async function find_user_by_id(user_id) {
             let db_json = JSON.parse(res.toString('utf-8'))
             // TODO check user_id for mistakes
             return db_json.users.find(user => user.u_id === user_id)
-        })
-        .catch(err => {
-            console.log("Can't parse db")
         })
 }
 
@@ -192,9 +176,6 @@ async function update_user_status(user_id, new_status)
             await fs.writeFile(db_file, JSON.stringify(db_json))
             return user
         })
-        .catch(err => {
-            console.log("Can't parse db")
-        })
 }
 
 async function update_delete_post(user_id, post_id)
@@ -208,9 +189,6 @@ async function update_delete_post(user_id, post_id)
             post.p_status = "deleted"
             await fs.writeFile(db_file, JSON.stringify(db_json))
         })
-        .catch(err => {
-            console.log("Can't parse db")
-        })
 }
 
 async function find_user_by_email(email) {
@@ -220,9 +198,6 @@ async function find_user_by_email(email) {
             return db_json.users.find(user => {
                 return user.email === email
              })
-        })
-        .catch(err => {
-            console.log("Can't parse db")
         })
 }
 
@@ -237,9 +212,6 @@ async function add_user(user)
             db_json.users.push(user)
             await fs.writeFile(db_file, JSON.stringify(db_json))
             return user.u_id
-        })
-        .catch(err => {
-            console.log("Can't parse db")
         })
 }
 
@@ -260,9 +232,6 @@ async function add_message(sender, receiver, message)
             await fs.writeFile(db_file, JSON.stringify(db_json))
             return message.m_id
         })
-        .catch(err => {
-            console.log("Can't parse db")
-        })
 }
 
 async function add_broadcast_message(sender, message)
@@ -281,9 +250,6 @@ async function add_broadcast_message(sender, message)
             await fs.writeFile(db_file, JSON.stringify(db_json))
             return message.m_id
         })
-        .catch(err => {
-            console.log("Can't parse db")
-        })
 }
 
 async function add_post(poster, post)
@@ -301,9 +267,6 @@ async function add_post(poster, post)
                 }
             })
             await fs.writeFile(db_file, JSON.stringify(db_json))
-        })
-        .catch(err => {
-            console.log("Can't parse db")
         })
 }
 
@@ -341,9 +304,6 @@ async function is_email_exist(email){
                 return user.email === email
             })
         })
-        .catch(err => {
-            console.log("Can't parse db")
-        })
 }
 
 async function get_tokens(){
@@ -351,8 +311,6 @@ async function get_tokens(){
         .then(res => {
             let db_json = JSON.parse(res.toString('utf-8'))
             return db_json.tokens
-        }).catch(err => {
-            console.log("Can't parse db")
         })
 }
 
