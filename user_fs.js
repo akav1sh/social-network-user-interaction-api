@@ -1,17 +1,11 @@
+// Module user_fs handles the DB file, receive and returning usable JSON objects of required data.
 
 const fs = require("fs").promises
 
 let db_file
-// TODO comment
-// const user_type = '3'
-// const post_type = '7'
-// const message_type = '9'
 let current_user_id = undefined
 let current_post_id = undefined
 let current_message_id = undefined
-
-//TODO make read / write to fs wrapper for errors
-// User_fs handles the DB file, receive and returning usable JSON objects of required data.
 
 async function exists( path )
 {
@@ -34,9 +28,10 @@ async function initialize_db(path)
             console.log("DB file already exists, not creating a new one!")
             await fs.readFile(path + "db")
                 .then(res => {
+                    console.log("Current IDs logged in DB")
                     const db_json = JSON.parse(res.toString('utf-8'))
                     current_user_id = db_json.max_u_id
-                    console.log(current_user_id) //TODO add check if empty
+                    current_user_id !== undefined ? console.log(current_user_id) : console.log("0")
                     current_post_id = db_json.max_p_id
                     console.log(current_post_id)
                     current_message_id = db_json.max_m_id
