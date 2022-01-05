@@ -9,6 +9,7 @@
 node-examples/
 db
 package-lock.json
+js-ex2.zip
 
 # User-specific stuff
 .idea/**/workspace.xml
