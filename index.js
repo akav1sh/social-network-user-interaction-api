@@ -10,7 +10,7 @@ const schedule = require('node-schedule')
 const app = express()
 let  port = 2718
 
-// For readability - don't use 7 and 9 but here to understand
+// For readability - we don't use 7 and 9 but they are mentioned here to understand
 const all = "0"
 const admin_id = "1"
 const user_type = '3'
@@ -63,6 +63,8 @@ async function get_version( req, res) {
     }
 }
 
+// Function lists all users - admin receives more information than regular user
+// Input: No body needed 
 async function list_users( req, res) {
     try {
         const admin = req.token_info.id === admin_id
@@ -87,6 +89,8 @@ async function list_users( req, res) {
     }
 }
 
+// Function deletes user - called by user himself and asks for user password
+// Input: Body requires user password
 async function delete_user( req, res ) {
     try {
         // Validations
@@ -131,6 +135,8 @@ async function delete_user( req, res ) {
     }
 }
 
+// Function is a sign up new user creation
+// Input: full name, email and password
 async function create_user( req, res ) {
     try {
         // Validations
@@ -172,9 +178,10 @@ async function create_user( req, res ) {
     }
 }
 
+// Function updates user status by admin
+// Input: ID of user to update and new status (active/suspended/deleted)
 async function update_user_status( req, res ) {
     try {
-        // YES authentication needed
         // Validation
         if (!req.body.hasOwnProperty("u_id") ||
             !req.body.hasOwnProperty("u_status"))
@@ -223,6 +230,8 @@ async function update_user_status( req, res ) {
     }
 }
 
+// This is a login function that gives user a token to use
+// Input: Email and password
 async function login_user(req, res) {
     try {
         // Validations
@@ -271,6 +280,8 @@ async function login_user(req, res) {
     }
 }
 
+// This function logs user out, rendering his token invalid
+// Input: No body needed
 async function logout_user(req, res) {
     try {
         await user_fs.remove_token(req.token)
@@ -283,9 +294,10 @@ async function logout_user(req, res) {
     }
 }
 
+// This function creates a post for a user
+// Input: Text
 async function create_user_post(req, res) {
     try {
-        // YES authentication needed
         // Validation
         if (!req.body.hasOwnProperty("text"))
         {
@@ -293,7 +305,7 @@ async function create_user_post(req, res) {
             res.json({error: "Missing information."})
         }
         else
-        {//TODO check post id
+        {
             const u_id = req.token_info.id
             const user = await user_fs.find_user_by_id(u_id)
             let new_post = {
@@ -315,6 +327,8 @@ async function create_user_post(req, res) {
     }
 }
 
+// This function deletes a post for a user
+// Input: Post ID 
 async function delete_user_post(req, res) {
     try {
         // Validation
@@ -348,6 +362,8 @@ async function delete_user_post(req, res) {
     }
 }
 
+// This function gets posts for user
+// Input: User id or 0 to view all posts from all, post amount or 0 for all posts available
 async function get_user_post(req, res) {
     try {
         //  Validation
@@ -384,6 +400,8 @@ async function get_user_post(req, res) {
     }
 }
 
+// This function sends message from admin to all users
+// Input: Text
 async function admin_broadcast(req, res) {
     try {
         if (!req.body.hasOwnProperty('text'))
@@ -427,6 +445,8 @@ async function admin_broadcast(req, res) {
     }
 }
 
+// This function returns messages for user
+// Input: Sender id or 0 for messages from all the users and status of message (all/read/unread)
 async function get_user_message(req, res) {
     try {
         if (!req.body.hasOwnProperty('sender_id') ||
@@ -455,6 +475,8 @@ async function get_user_message(req, res) {
     }
 }
 
+// This functions sends message from user to another user
+// Input: ID of user to send to and text
 async function send_user_message(req, res) {
     try {
         if (!req.body.hasOwnProperty('text') ||
@@ -496,6 +518,7 @@ async function send_user_message(req, res) {
     }
 }
 
+// This is a middleware function to make sure authentication is valid
 async function authenticateToken(req, res, next) {
     const authHeader = req.headers.authorization
     const token = authHeader && authHeader.split(' ')[1]
@@ -521,7 +544,6 @@ async function authenticateToken(req, res, next) {
 
 // Routing
 const router = express.Router()
-
 router.get('/version', async (req, res) => { await get_version(req, res ) })
 
 router.get('/admin/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
