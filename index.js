@@ -1,6 +1,7 @@
 // External modules
 // const g_state = {app: undefined}
 const express = require('express')
+const path = require("path")
 const StatusCodes = require('http-status-codes').StatusCodes
 const package_info = require('./package.json')
 const user_fs = require("./user_fs")
@@ -18,13 +19,38 @@ const post_type = '7'
 const message_type = '9'
 
 // General app settings
-const set_content_type = function (req, res, next) {
-    res.setHeader("Content-Type", "application/json; charset=utf-8")
+const reExt = /\.([a-z]+)/i
+
+function content_type_from_extension( url)
+{
+    const m = url.match( reExt )
+    if ( !m ) return 'application/json'
+    const ext = m[1].toLowerCase()
+
+    switch( ext )
+    {
+        case 'js': return 'text/javascript'
+        case 'css': return 'text/css'
+        case 'html': return 'text/html'
+    }
+
+    return 'text/plain'
+}
+
+const set_content_type = function (req, res, next)
+{
+    const content_type = req.baseUrl == '/api' ? "application/json; charset=utf-8" : content_type_from_extension( req.url)
+    res.setHeader("Content-Type", content_type)
     next()
 }
 
-app.use( set_content_type )
+
+app.use(  set_content_type )
 app.use(express.json())  // to support JSON-encoded bodies
+app.use(express.urlencoded( // to support URL-encoded bodies
+    {
+        extended: true
+    }))
 
 
 // Repeated function every 10 mins to remove expired tokens
@@ -60,6 +86,15 @@ async function get_version( req, res) {
         console.error(err.stack)
         res.status(StatusCodes.INTERNAL_SERVER_ERROR)
         res.json({error: "Internal Server Error."})
+    }
+}
+
+async function get_landing_page(req, res) {
+    try{
+        res.status(StatusCodes.OK)
+        res.sendFile(__dirname + "/site/hello.txt")
+    }catch (err) {
+
     }
 }
 
@@ -268,6 +303,7 @@ async function login_user(req, res) {
             else
             {
                 const res_token = secure_validate.create_token(user)
+                res.setHeader('Set-Cookie', [`token=${res_token.token}`])
                 await user_fs.add_token(res_token.token)
                 res.status(StatusCodes.OK)
                 res.json(res_token)
@@ -520,8 +556,21 @@ async function send_user_message(req, res) {
 
 // This is a middleware function to make sure authentication is valid
 async function authenticateToken(req, res, next) {
-    const authHeader = req.headers.authorization
-    const token = authHeader && authHeader.split(' ')[1]
+    let token
+    if("authorization" in req.headers)
+    {
+        const authHeader = req.headers.authorization
+        token = authHeader.split(' ')[1]
+    }
+    else if(req.headers.cookie)
+    {
+        const cookie = req.headers.cookie
+        token = cookie.split(/; */).find(cookie => cookie.split('=')[0] === 'token').split('=')[1]
+    }
+    else
+    {
+        token = null
+    }
     req.token = token
     if (token == null)
     {
@@ -560,7 +609,11 @@ router.get('/user/post', authenticateToken, async (req, res) => { await get_user
 router.get('/user/message', authenticateToken, async (req, res) => { await get_user_message(req, res ) })
 router.post('/user/message', authenticateToken, async (req, res) => { await send_user_message(req, res ) })
 
+app.use(express.static(path.join(__dirname, 'site')));
 app.use('/api',router)
+
+app.get('/', async (req, res) => { await get_landing_page(req, res ) })
+
 
 
 // Init
