@@ -92,7 +92,7 @@ async function get_version( req, res) {
 async function get_landing_page(req, res) {
     try{
         res.status(StatusCodes.OK)
-        res.sendFile(__dirname + "/site/hello.txt")
+        res.sendFile(__dirname + "/site/index.html")
     }catch (err) {
 
     }
