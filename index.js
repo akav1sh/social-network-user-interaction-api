@@ -78,6 +78,7 @@ async function remove_expired_tokens(){
 
 // Version
 async function get_version( req, res) {
+    console.log("CCCCCCC")
     try {
         const version_obj = {version: package_info.version, description: package_info.description}
         res.status(StatusCodes.OK)
@@ -90,11 +91,16 @@ async function get_version( req, res) {
 }
 
 async function get_landing_page(req, res) {
+    console.log("AAAAA")
     try{
+        console.log("BBBB")
+        console.log(res.headersSent)
         res.status(StatusCodes.OK)
+        // res.type('.html')
+        // res.send("Hi")
         res.sendFile(__dirname + "/site/index.html")
     }catch (err) {
-
+        console.log(err)
     }
 }
 
@@ -591,10 +597,12 @@ async function authenticateToken(req, res, next) {
     }
 }
 
+app.get('/', async (req, res) => { await get_landing_page(req, res ) })
+
 // Routing
 const router = express.Router()
-router.get('/version', async (req, res) => { await get_version(req, res ) })
 
+router.get('/version', async (req, res) => { await get_version(req, res ) })
 router.get('/admin/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
 router.put('/admin/status', authenticateToken, async (req, res) => { await update_user_status(req, res ) })
 router.post('/admin/broadcast', authenticateToken, async (req, res) => { await admin_broadcast(req, res ) })
@@ -610,9 +618,8 @@ router.get('/user/message', authenticateToken, async (req, res) => { await get_u
 router.post('/user/message', authenticateToken, async (req, res) => { await send_user_message(req, res ) })
 
 app.use(express.static(path.join(__dirname, 'site')));
-app.use('/api',router)
 
-app.get('/', async (req, res) => { await get_landing_page(req, res ) })
+app.use('/api',router)
 
 
 
