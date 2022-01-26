@@ -78,7 +78,6 @@ async function remove_expired_tokens(){
 
 // Version
 async function get_version( req, res) {
-    console.log("CCCCCCC")
     try {
         const version_obj = {version: package_info.version, description: package_info.description}
         res.status(StatusCodes.OK)
@@ -91,13 +90,10 @@ async function get_version( req, res) {
 }
 
 async function get_landing_page(req, res) {
-    console.log("AAAAA")
     try{
-        console.log("BBBB")
         console.log(res.headersSent)
         res.status(StatusCodes.OK)
-        // res.type('.html')
-        // res.send("Hi")
+        res.type('html')
         res.sendFile(__dirname + "/site/index.html")
     }catch (err) {
         console.log(err)
