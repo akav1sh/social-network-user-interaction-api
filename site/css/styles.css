@@ -4,6 +4,9 @@ h1 {
 	text-align: center;
 }
 
+h2 {
+	align-self: center;
+}
 
 *{
 	margin: 0;
@@ -177,3 +180,97 @@ background: #268a7c;
 }
   
 
+
+.header {    
+  padding: 20px 16px;
+  background: #dd9897;
+  display: flex;
+  color: rgb(15 15 15 / 28%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  font-family: 'Roboto', sans-serif;
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
+  box-shadow: 0px 0px 12px 2px rgb(15 15 15 / 28%);
+  }
+
+  .profile-box {
+    height: 60%;
+    width: 200px;
+    background: #56997d;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 10%;
+    left: 0;
+    font-family: 'Roboto', sans-serif;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    box-shadow: 5px 4px 12px 2px rgb(15 15 15 / 28%)
+  }
+
+  .profile-pic {
+    background-image: url('./images/avatar1.png');
+    background-size: cover;
+    height: 130px;
+    width: 130px;
+    position: relative;
+    border-radius: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10%;
+    box-shadow: 5px 4px 12px 2px rgb(15 15 15 / 28%);
+  }
+
+  .icon-container {
+    filter: opacity(0.6);
+    display: flex;
+    column-gap: 1.4rem;
+    flex-direction: row;
+    margin-left: auto;
+  }
+
+  .icon-container > .logout {
+    background-image: url(./images/logout.png);
+    height: 30px;
+    width: 30px;
+    background-size: cover;
+  }
+
+  .icon-container > .about {
+    background-image: url(./images/about.png);
+    height: 30px;
+    width: 30px;
+    background-size: cover;
+  }
+
+  .icon-container > .posts {
+    background-image: url(/css/images/posts.png);
+    height: 30px;
+    width: 30px;
+    background-size: cover;
+  }
+
+  .icon-container > .messages {
+    background-image: url(/css/images/messages.png);
+    height: 30px;
+    width: 30px;
+    background-size: cover;
+  }
+
+  @media only screen and (max-width: 768px) {
+    .profile-box {
+      width: 100px;
+    }
+
+    .profile-pic {
+    	height:70px;
+    	width:70px;
+    }
+
+    .header {  
+      padding: 10px 16px;
+    }
+  }
