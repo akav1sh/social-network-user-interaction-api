@@ -5,7 +5,6 @@ class Login extends React.Component {
 
 	handle_submit = e => {
 		e.preventDefault();
-		console.log(e.target.email.value);
 	
 		if (!e.target.email.value) {
 			alert("Email is required");
@@ -83,7 +82,6 @@ class Register extends React.Component {
 
 	handle_submit = e => {
 		e.preventDefault();
-		console.log(e.target.email.value);
 	
 		if (!e.target.email.value) {
 		  alert("Email is required");
@@ -189,6 +187,45 @@ class Header extends React.Component {
 	constructor(props) {
 		super(props);
 	}
+
+	handle_posts = e => {
+		this.setState((_prev_state) => (_new_state));
+	}
+
+	handle_messages = e => {
+		logout()
+		.then((res) => {
+			if (res.ok) {
+				alert("Successfully logged out");
+				this.props.change_login();
+			} else {
+				res.json().then(data => {
+					alert(data.error);
+				});
+			}
+		}).catch();
+	}
+
+	handle_about = e => {
+		
+	}
+
+	handle_logout = e => {
+		e.preventDefault();
+console.log("looogout");
+		logout()
+		.then((res) => {
+			if (res.ok) {
+				alert("Successfully logged out");
+				this.props.change_login();
+			} else {
+				res.json().then(data => {
+					alert(data.error);
+				});
+			}
+		}).catch();
+	}
+
 	
 	render() {
 		return React.createElement(
@@ -218,7 +255,7 @@ class Header extends React.Component {
 				),
 				React.createElement(
 					"div",
-					{ className: "logout", id: "logout" },
+					{ className: "logout", id: "logout", onClick: this.handle_logout },
 					
 				)
 			)
@@ -231,16 +268,11 @@ class Homepage extends React.Component {
 		super(props);
 	}
 
-	handle_post = e => {
-		e.preventDefault();
-		console.log(e.target.post.value);
-	}
-
 	render() {
 		return React.createElement(
 			"div",
 			null,
-			React.createElement(Header),
+			React.createElement(Header, {change_login: this.props.change_login.bind(this)}),
 			React.createElement(
 				"div",
 				{ className: "profile-container", id: "profile" },
@@ -261,35 +293,7 @@ class Homepage extends React.Component {
 					this.props.full_name,
 				),
 			), 
-			React.createElement(
-				"div",
-				{ className: "post-container", id: "write-post" },
-			  	React.createElement(
-				"div",
-				null,
-				React.createElement(
-					"div",
-					{ className: "post-text" },
-					"Write a post:"
-					),
-					React.createElement(
-						"div",
-						{ className: "flex-box" },
-						React.createElement(
-							"div",
-							{ className: "input-group" },
-							React.createElement("input",
-							{ className: "post-input", type: "text", name: "post", placeholder: "I'm feeling..." }
-							),
-						),
-						React.createElement(
-							"button",
-							{ className: "secondary", onSubmit: this.handle_post },
-							"Post"
-						),	
-					),
-			  	),
-			),
+			React.createElement(NewPost),
 		);
 	}
 }

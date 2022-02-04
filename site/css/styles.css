@@ -183,7 +183,7 @@ button.secondary:hover {
     
 
 .text {
-	color: rgb(15 15 15 / 28%);
+	color: rgb(15 15 15 / 51%);
 	font-size: 21px;
 	font-weight: 700;
 	margin-right: 2.5em;
@@ -191,7 +191,7 @@ button.secondary:hover {
 }
   
 .homepage-text {
-  color: rgb(15 15 15 / 28%);
+  color: rgb(15 15 15 / 51%);
   font-size: 21px;
   font-weight: 700;
   margin-right: 1.2em;
@@ -201,7 +201,7 @@ button.secondary:hover {
 }
 
 .post-text {
-  color: rgb(15 15 15 / 28%);
+  color: rgb(15 15 15 / 51%);
   font-size: 18px;
   font-weight: 700;
   margin: 5px;
@@ -224,8 +224,8 @@ button.secondary:hover {
   }
 
   .profile-container {
-    height: 60%;
-    width: 200px;
+    height: 40%;
+    width: 15%;
     background: #56997d;
     display: flex;
     flex-direction: column;
@@ -267,6 +267,9 @@ button.secondary:hover {
     flex-direction: row;
     margin-left: auto;
     align-items: center;
+  }
+  .icon-container:hover {
+    cursor: pointer;
   }
 
   .icon-container > .logout {
@@ -345,7 +348,7 @@ button.secondary:hover {
 
     .profile-pic {
     	height: 90px;
-    	width: 90px;
+    	width: 45px;
     }
 
     .header {  

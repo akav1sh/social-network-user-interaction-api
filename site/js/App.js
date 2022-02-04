@@ -10,6 +10,11 @@ class App extends React.Component {
 	componentDidMount() {
 	  this.rightSide.classList.add("right");
 	}
+
+	change_login() {
+		this.setState((_prev_state) => ({ page: "register"}));
+		this.change_state();
+	}
   
 	handle_homepage(id, name) {
 		this.setState(_prev_state => ({ page: "homepage", u_id: id, full_name: name}));
@@ -21,7 +26,7 @@ class App extends React.Component {
 	  if (page === "login") {
 		this.rightSide.classList.remove("right");
 		this.rightSide.classList.add("left");
-	  } else if (page === "register") {
+	  } else {
 		this.rightSide.classList.remove("left");
 		this.rightSide.classList.add("right");
 	  } 
@@ -53,7 +58,7 @@ class App extends React.Component {
 			)
 		  );
 	  } else {
-		page_layout = React.createElement(Homepage, {u_id: this.state.u_id, full_name: this.state.full_name});
+		page_layout = React.createElement(Homepage, { change_login: this.change_login.bind(this), u_id: this.state.u_id, full_name: this.state.full_name});
 	  }
 	  return page_layout
 	}
