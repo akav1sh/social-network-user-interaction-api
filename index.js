@@ -91,7 +91,6 @@ async function get_version( req, res) {
 
 async function get_landing_page(req, res) {
     try{
-        console.log(res.headersSent)
         res.status(StatusCodes.OK)
         res.type('html')
         res.sendFile(__dirname + "/site/index.html")
@@ -304,11 +303,13 @@ async function login_user(req, res) {
             }
             else
             {
-                const res_token = secure_validate.create_token(user)
-                res.setHeader('Set-Cookie', [`token=${res_token.token}`])
-                await user_fs.add_token(res_token.token)
+                const res_data = secure_validate.create_token(user)
+                res_data.u_id = user.u_id
+                res_data.full_name = user.full_name
+                res.setHeader('Set-Cookie', [`token=${res_data.token}`])
+                await user_fs.add_token(res_data.token)
                 res.status(StatusCodes.OK)
-                res.json(res_token)
+                res.json(res_data)
             }
         }
     }catch (err) {
