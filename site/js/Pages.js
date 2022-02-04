@@ -18,9 +18,8 @@ class Login extends React.Component {
 			.then((res) => {
 				if (res.ok) {
 					alert("Successfully logged in");
-					res.json().then((json) => {
-						this.props.handle_login(u_id, u_name);
-						this.props.handle_homepage();
+					res.json().then((data) => {
+						this.props.handle_homepage(data.u_id, data.full_name);
 					});
 				} else {
 					res.json().then(data => {
@@ -186,29 +185,6 @@ class Register extends React.Component {
 	}
 }
 
-
-class Homepage extends React.Component {
-	constructor(props) {
-		super(props);
-	}
-
-	render() {
-		return React.createElement(
-			"div",
-			null,
-			React.createElement(Header),
-			React.createElement(
-			  "div",
-			  { className: "profile-box", id: "profile" },
-			  React.createElement(
-				"div",
-				{ className: "profile-pic", id: "profile-pic" }
-			  )
-			)
-		);
-	}
-}
-
 class Header extends React.Component {
 	constructor(props) {
 		super(props);
@@ -246,6 +222,74 @@ class Header extends React.Component {
 					
 				)
 			)
+		);
+	}
+}
+
+class Homepage extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+
+	handle_post = e => {
+		e.preventDefault();
+		console.log(e.target.post.value);
+	}
+
+	render() {
+		return React.createElement(
+			"div",
+			null,
+			React.createElement(Header),
+			React.createElement(
+				"div",
+				{ className: "profile-container", id: "profile" },
+				React.createElement(
+				"div",
+				{ className: "profile-pic", id: "profile-pic" }
+				), 
+				React.createElement(
+					"div",
+					{ className: "homepage-text", id: "user-info" },
+					"User ID: ",
+					React.createElement("br", null),
+					this.props.u_id,
+					React.createElement("br", null),
+					React.createElement("br", null),
+					"Full name: ",
+					React.createElement("br", null),
+					this.props.full_name,
+				),
+			), 
+			React.createElement(
+				"div",
+				{ className: "post-container", id: "write-post" },
+			  	React.createElement(
+				"div",
+				null,
+				React.createElement(
+					"div",
+					{ className: "post-text" },
+					"Write a post:"
+					),
+					React.createElement(
+						"div",
+						{ className: "flex-box" },
+						React.createElement(
+							"div",
+							{ className: "input-group" },
+							React.createElement("input",
+							{ className: "post-input", type: "text", name: "post", placeholder: "I'm feeling..." }
+							),
+						),
+						React.createElement(
+							"button",
+							{ className: "secondary", onSubmit: this.handle_post },
+							"Post"
+						),	
+					),
+			  	),
+			),
 		);
 	}
 }
