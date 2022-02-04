@@ -15,6 +15,15 @@ class App extends React.Component {
 		this.setState(_prev_state => ({ page: "homepage"}));
 	}
 
+	handle_login(u_id, u_name) {
+		this.props.u_id = u_id;
+		this.props.u_name = u_name;
+	}
+
+	get_props() {
+		return this.props;
+	}
+
 	change_state() {
 	  const { page } = this.state;
   
@@ -42,7 +51,7 @@ class App extends React.Component {
 			  React.createElement(
 				"div",
 				{ className: "container"},
-				page === "login" && React.createElement(Login, { handle_homepage: this.handle_homepage.bind(this) }),
+				page === "login" && React.createElement(Login, { handle_homepage: this.handle_homepage.bind(this), handle_login: this.handle_login.bind(this)}),
 				page === "register" && React.createElement(Register, { change_state: this.change_state.bind(this) }),
 			  ),
 			  React.createElement(RightSide, {
@@ -53,7 +62,7 @@ class App extends React.Component {
 			)
 		  );
 	  } else {
-		page_layout = React.createElement(Homepage);
+		page_layout = React.createElement(Homepage, { get_props:this.get_props.bind(this)});
 	  }
 	  return page_layout
 	}

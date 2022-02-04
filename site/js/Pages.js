@@ -18,7 +18,10 @@ class Login extends React.Component {
 			.then((res) => {
 				if (res.ok) {
 					alert("Successfully logged in");
-					this.props.handle_homepage();
+					res.json().then((json) => {
+						this.props.handle_login(u_id, u_name);
+						this.props.handle_homepage();
+					});
 				} else {
 					res.json().then(data => {
 						alert(data.error);
@@ -214,11 +217,10 @@ class Header extends React.Component {
 	render() {
 		return React.createElement(
 			"div",
-			{ className: "header", id: "myHeader" },
+			{ className: "header", id: "header" },
 			React.createElement(
-				"h2",
-				null,
-				"My Header"
+				"div",
+				{ className: "header-icon", id: "header-icon" }
 			),
 			React.createElement(
 				"div",
