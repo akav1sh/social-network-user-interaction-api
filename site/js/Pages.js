@@ -1,27 +1,32 @@
-export class Login extends React.Component {
+class Login extends React.Component {
 	constructor(props) {
 		super(props);
 	}
 
-	handleSubmit = e => {
+	handle_submit = e => {
 		e.preventDefault();
 		console.log(e.target.email.value);
 	
 		if (!e.target.email.value) {
-		  alert("Email is required");
+			alert("Email is required");
 		} else if (!e.target.email.value) {
-		  alert("Valid email is required");
+			alert("Valid email is required");
 		} else if (!e.target.password.value) {
-		  alert("Password is required");
-		} else if (
-		  e.target.email.value === "me@example.com" &&
-		  e.target.password.value === "123456"
-		) {
-		  alert("Successfully logged in");
-		  e.target.email.value = "";
-		  e.target.password.value = "";
+			alert("Password is required");
 		} else {
-		  alert("Wrong email or password combination");
+			login(e.target.email.value, e.target.password.value)
+			.then((res) => {
+				if (res.ok) {
+					alert("Successfully logged in");
+					this.props.handle_homepage();
+				} else {
+					res.json().then(data => {
+						alert(data.error);
+						e.target.email.value = "";
+						e.target.password.value = ""
+					});
+				}
+			}).catch();
 		}
 	  };
 
@@ -36,7 +41,7 @@ export class Login extends React.Component {
 			  ),
 			React.createElement(
 			  "form",
-			  { className: "form", onSubmit: this.handleSubmit },
+			  { className: "form", onSubmit: this.handle_submit },
 			  React.createElement(
 				"div",
 				{ className: "input-group" },
@@ -69,12 +74,12 @@ export class Login extends React.Component {
 }
 
 
-export class Register extends React.Component {
+class Register extends React.Component {
 	constructor(props) {
 		super(props);
 	}
 
-	handleSubmit = e => {
+	handle_submit = e => {
 		e.preventDefault();
 		console.log(e.target.email.value);
 	
@@ -95,11 +100,21 @@ export class Register extends React.Component {
 			e.target.password.value = "";
 			e.target.repeat_password.value = "";
 		} else {
-			alert("Successfully created user");
-			e.target.full_name.value = "";
-			e.target.email.value = "";
-			e.target.password.value = "";
-			e.target.repeat_password.value = "";
+			register(e.target.full_name.value, e.target.email.value, e.target.password.value)
+			.then((res) => {
+				if (res.ok) {
+					alert("Successfully registered");
+					this.props.change_state();
+				} else {
+					res.json().then(data => {
+						alert(data.error);
+						e.target.full_name.value = "";
+						e.target.email.value = "";
+						e.target.password.value = "";
+						e.target.repeat_password.value = "";
+					});
+				}
+			}).catch();
 		}
 	  };
 
@@ -115,7 +130,7 @@ export class Register extends React.Component {
 			  ),
 			React.createElement(
 			  "form",
-			  { className: "form", onSubmit: this.handleSubmit },
+			  { className: "form", onSubmit: this.handle_submit },
 			  React.createElement(
 				"div",
 				{ className: "input-group" },
@@ -168,4 +183,67 @@ export class Register extends React.Component {
 	}
 }
 
-  
+
+class Homepage extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+
+	render() {
+		return React.createElement(
+			"div",
+			null,
+			React.createElement(Header),
+			React.createElement(
+			  "div",
+			  { className: "profile-box", id: "profile" },
+			  React.createElement(
+				"div",
+				{ className: "profile-pic", id: "profile-pic" }
+			  )
+			)
+		);
+	}
+}
+
+class Header extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	
+	render() {
+		return React.createElement(
+			"div",
+			{ className: "header", id: "myHeader" },
+			React.createElement(
+				"h2",
+				null,
+				"My Header"
+			),
+			React.createElement(
+				"div",
+				{ className: "icon-container", id: "icons" },
+				React.createElement(
+					"div",
+					{ className: "posts", id: "posts" },
+					
+				),
+				React.createElement(
+					"div",
+					{ className: "messages", id: "messages" },
+					
+				),
+				React.createElement(
+					"div",
+					{ className: "about", id: "about" },
+					
+				),
+				React.createElement(
+					"div",
+					{ className: "logout", id: "logout" },
+					
+				)
+			)
+		);
+	}
+}
