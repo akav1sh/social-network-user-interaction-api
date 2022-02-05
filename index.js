@@ -95,7 +95,23 @@ async function get_landing_page(req, res) {
         res.type('html')
         res.sendFile(__dirname + "/site/index.html")
     }catch (err) {
-        console.log(err)
+        console.error(err.stack)
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        res.json({error: "Internal Server Error."})
+    }
+}
+
+async function is_logged_user(req, res) {
+    try{
+        const u_token_id = req.token_info.id
+        const user = await user_fs.find_user_by_id(u_token_id)
+        const {u_id, full_name} = user
+        const res_user = {u_id, full_name}
+        res.json(res_user)
+    }catch (err){
+        console.error(err.stack)
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        res.json({error: "Internal Server Error."})
     }
 }
 
@@ -612,6 +628,9 @@ router.delete('/user/post', authenticateToken, async (req, res) => { await delet
 router.get('/user/post', authenticateToken, async (req, res) => { await get_user_post(req, res ) })
 router.get('/user/message', authenticateToken, async (req, res) => { await get_user_message(req, res ) })
 router.post('/user/message', authenticateToken, async (req, res) => { await send_user_message(req, res ) })
+
+
+router.get('/user/logged', authenticateToken, async (req, res) => { await is_logged_user(req, res ) })
 
 app.use(express.static(path.join(__dirname, 'site')));
 
