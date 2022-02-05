@@ -277,10 +277,7 @@ class Homepage extends React.Component {
 				{ className: "posts-container", id: "posts-container" },
 				React.createElement(NewPost),
 				React.createElement(LatestPost, { u_id: this.props.u_id }),
-				React.createElement(LatestPost),
-				React.createElement(LatestPost),
-				React.createElement(LatestPost),
-				React.createElement(LatestPost),
+				// React.createElement(Post, { amount: 3 }),
 			),
 		);
 	}
@@ -295,7 +292,7 @@ class About extends React.Component {
 		return React.createElement(
 			"div",
 			null,
-			React.createElement(Header, { change_page: this.props.change_page.bind(this) }),
+			React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
 			React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }), 
 			React.createElement(
 				"div",
