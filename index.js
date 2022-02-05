@@ -58,16 +58,16 @@ async function remove_expired_tokens(){
     try {
         let tokens_from_db = await user_fs.get_tokens()
         if (tokens_from_db) {
-            tokens_from_db = tokens_from_db.filter(token => {
+            const tokens_to_delete = await tokens_from_db.reduce(async (tokens_to_delete ,token) => {
                 try {
-                    secure_validate.verify_token(token)
-                    return false
+                    await secure_validate.verify_token(token)
+                    return tokens_to_delete
                 } catch (err) {
-                    return true
+                    return (await tokens_to_delete).concat(token)
                 }
-            })
+            }, [])
 
-            for (let old_token of tokens_from_db) {
+            for (let old_token of tokens_to_delete) {
                 await user_fs.remove_token(old_token)
             }
         }
@@ -598,7 +598,7 @@ async function authenticateToken(req, res, next) {
     }
 
     try {
-        req.token_info = secure_validate.verify_token(token)
+        req.token_info = await secure_validate.verify_token(token)
         const user = await user_fs.find_user_by_id(req.token_info.id)
         if (user.u_status !== "active")
             throw Error("Status is not active.")
@@ -639,7 +639,7 @@ app.use('/api',router)
 
 
 // Init
-schedule.scheduleJob('*/1 * * * *', remove_expired_tokens)
+schedule.scheduleJob('*/10 * * * *', remove_expired_tokens)
 
 user_fs.initialize_db(`./`).then(async res => {
     let msg = `${package_info.description} listening at port ${port}`

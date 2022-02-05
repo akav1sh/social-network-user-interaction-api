@@ -37,9 +37,9 @@ function create_token(user)
     return {token: jwt.sign(token_info, process.env.TOKEN_SECRET, {expiresIn: '10m'})}
 }
 
-function verify_token(token)
+async function verify_token(token)
 {
-    if (!find_token(token))
+    if (!await find_token(token))
     {
         throw Error("Token expired.")
     }
