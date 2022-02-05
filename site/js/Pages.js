@@ -189,7 +189,7 @@ class Header extends React.Component {
 	}
 
 	handle_admin = e => {		
-		this.props.change_page("homepage");
+		this.props.change_page("admin");
 	}
 
 	handle_posts = e => {		
@@ -276,7 +276,7 @@ class Homepage extends React.Component {
 				"div",
 				{ className: "posts-container", id: "posts-container" },
 				React.createElement(NewPost),
-				React.createElement(LatestPost, this.props.u_id),
+				React.createElement(LatestPost, { u_id: this.props.u_id }),
 				React.createElement(LatestPost),
 				React.createElement(LatestPost),
 				React.createElement(LatestPost),
@@ -310,6 +310,22 @@ class About extends React.Component {
 					"Mauris sed est at augue accumsan dignissim. Donec malesuada pulvinar dolor, a vulputate orci malesuada nec. Integer sit amet dolor dapibus, hendrerit neque at, efficitur dui. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur ligula nisl, facilisis eu egestas vel, placerat at nisi. Aliquam sit amet justo eget ipsum dictum iaculis. Vivamus vehicula est eget velit aliquet, vel congue mi porttitor. Fusce vehicula enim in mollis aliquam. Donec imperdiet cursus erat, quis sagittis massa ullamcorper in. Proin mattis, elit nec faucibus porta, nisl massa molestie erat, sed interdum orci quam ut nisi. Duis maximus leo ut nisl consequat faucibus. Vestibulum interdum scelerisque est a scelerisque. Sed non libero quis nulla bibendum pellentesque."
 				),
 			),
+		);
+	}
+}
+
+class Admin extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+
+	render() {
+		return React.createElement(
+			"div",
+			null,
+			React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
+			React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }),
+			
 		);
 	}
 }
