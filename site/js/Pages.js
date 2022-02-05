@@ -188,6 +188,10 @@ class Header extends React.Component {
 		super(props);
 	}
 
+	handle_admin = e => {		
+		this.props.change_page("homepage");
+	}
+
 	handle_posts = e => {		
 		this.props.change_page("homepage");
 	}
@@ -219,6 +223,12 @@ class Header extends React.Component {
 
 	
 	render() {
+		let admin;
+		if (this.props.u_id === "1")
+			admin = React.createElement(
+				"div",
+				{ className: "admin", id: "admin", onClick: this.handle_admin },	
+			);
 		return React.createElement(
 			"div",
 			{ className: "header", id: "header" },
@@ -229,25 +239,22 @@ class Header extends React.Component {
 			React.createElement(
 				"div",
 				{ className: "icon-container", id: "icons" },
+				admin,
 				React.createElement(
 					"div",
 					{ className: "posts", id: "posts", onClick: this.handle_posts },
-					
 				),
 				React.createElement(
 					"div",
 					{ className: "messages", id: "messages" },
-					
 				),
 				React.createElement(
 					"div",
 					{ className: "about", id: "about", onClick: this.handle_about },
-					
 				),
 				React.createElement(
 					"div",
 					{ className: "logout", id: "logout", onClick: this.handle_logout },
-					
 				)
 			)
 		);
@@ -263,13 +270,13 @@ class Homepage extends React.Component {
 		return React.createElement(
 			"div",
 			null,
-			React.createElement(Header, { change_page: this.props.change_page.bind(this) }),
+			React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
 			React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }),
 			React.createElement(
 				"div",
 				{ className: "posts-container", id: "posts-container" },
 				React.createElement(NewPost),
-				React.createElement(LatestPost),
+				React.createElement(LatestPost, this.props.u_id),
 				React.createElement(LatestPost),
 				React.createElement(LatestPost),
 				React.createElement(LatestPost),

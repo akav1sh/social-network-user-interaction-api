@@ -320,6 +320,13 @@ button.secondary:hover {
     background-size: cover;
   }
 
+  .icon-container > .admin {
+    background-image: url(/css/images/admin.png);
+    height: 40px;
+    width: 40px;
+    background-size: cover;
+  }
+
   .about-container,
   .post-container {
     height: 14%;
@@ -351,7 +358,7 @@ button.secondary:hover {
   }
 
 
-  @media only screen and (max-width: 768px) {
+  @media only screen and (max-width: 960px) {
     .login {
       width: 17em;
     } 
@@ -369,9 +376,16 @@ button.secondary:hover {
     .left:hover {
       right: 18%;
     }   
+    
+    .post-text {
+      font-size: 1rem;
+      margin:0;
+    }
 
-    .profile-box {
-      width: 130px;
+    .homepage-text {
+      font-size: 1rem;
+      margin-right: 0.5em;
+      margin-left: 0.5em;
     }
 
     .text {
@@ -381,8 +395,20 @@ button.secondary:hover {
       margin-left: 0.8em;
     }
 
-    .profile-pic {
-    	height: 90px;
+    .about-container, .post-container {
+      height: 12%;
+    }
+
+    .button {
+      font-size: 1rem;
+    }
+
+    .profile-pic1, 
+    .profile-pic2,
+    .profile-pic3,
+    .profile-pic4,
+    .profile-pic5 {
+    	height: 45px;
     	width: 45px;
     }
 
