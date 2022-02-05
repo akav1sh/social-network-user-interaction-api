@@ -66,7 +66,31 @@ class NewPost extends React.Component {
 class LatestPost extends React.Component {
     constructor(props) {
 		super(props);
+        this.state = {
+            text: "",
+            time: "",
+            p_status: "",
+            p_id: "",
+        };
+        //this.get_user_post(this.props.u_id);
 	}
+
+    get_user_post(u_id) {
+
+        get_post(u_id, 1)
+        .then((res) => {
+			if (res.ok) {
+                res.json().then((data) => {
+                    console.log(data[0]);
+                    this.setState((_prev_state) => ({ text: data[0].text, time: data[0].time, p_status: data[0].p_status, p_id: data[0].p_id}));
+                });
+            } else {
+				res.json().then(data => {
+					alert(data.error);
+				});
+			}
+		}).catch();
+    }
 
     render() {
         return React.createElement(
