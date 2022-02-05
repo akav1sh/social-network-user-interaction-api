@@ -70,7 +70,6 @@ async function create_post(text) {
 }
 
 async function get_post(u_id, amount) {
-    // const url = new URL(`${path}/user/post?u_id=${u_id}&post_amount=${amount}`)
     return fetch (`${path}/user/post?u_id=${u_id}&post_amount=${amount}`,
         {
             method: 'GET',
@@ -96,7 +95,6 @@ async function delete_post(p_id) {
 }
 
 async function get_message(sender_id, m_status) {
-    //const url = new URL(`${path}/user/message?sender_id=${sender_id}&m_status=${m_status}`)
     return fetch (`${path}/user/message?sender_id=${sender_id}&m_status=${m_status}`,
         {
             method: 'GET',

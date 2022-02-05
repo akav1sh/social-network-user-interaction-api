@@ -72,7 +72,7 @@ class LatestPost extends React.Component {
             p_status: "",
             p_id: "",
         };
-        //this.get_user_post(this.props.u_id);
+        this.get_user_post(this.props.u_id);
 	}
 
     get_user_post(u_id) {
