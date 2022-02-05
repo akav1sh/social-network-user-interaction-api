@@ -406,16 +406,16 @@ async function delete_user_post(req, res) {
 async function get_user_post(req, res) {
     try {
         //  Validation
-        if (!req.body.hasOwnProperty("u_id") ||
-            !req.body.hasOwnProperty("post_amount"))
+        if (!req.query.hasOwnProperty("u_id") ||
+            !req.query.hasOwnProperty("post_amount"))
         {
             res.status(StatusCodes.BAD_REQUEST)
             res.json({error: "Missing information."})
         }
         else
         {
-            const u_id = req.body.u_id
-            const post_amount = req.body.post_amount
+            const u_id = req.query.u_id
+            const post_amount = req.query.post_amount
             let posts = undefined
             if (u_id !== all)
             {
@@ -488,21 +488,21 @@ async function admin_broadcast(req, res) {
 // Input: Sender id or 0 for messages from all the users and status of message (all/read/unread)
 async function get_user_message(req, res) {
     try {
-        if (!req.body.hasOwnProperty('sender_id') ||
-            !req.body.hasOwnProperty('m_status'))
+        if (!req.query.hasOwnProperty('sender_id') ||
+            !req.query.hasOwnProperty('m_status'))
         {
             res.status(StatusCodes.BAD_REQUEST)
             res.json({error: "Missing information."})
         }
-        else if (!secure_validate.is_message_status_valid(req.body.m_status) ||
-            (req.body.sender_id !== all && req.body.sender_id !== admin_id && !secure_validate.is_id_valid(user_type, req.body.sender_id)))
+        else if (!secure_validate.is_message_status_valid(req.query.m_status) ||
+            (req.query.sender_id !== all && req.query.sender_id !== admin_id && !secure_validate.is_id_valid(user_type, req.query.sender_id)))
         {
             res.status(StatusCodes.BAD_REQUEST)
             res.json({error: "Invalid sender_id or m_status."})
         }
         else
         {
-            const messages = await user_fs.get_messages(req.token_info.id, req.body.sender_id, req.body.m_status)
+            const messages = await user_fs.get_messages(req.token_info.id, req.query.sender_id, req.query.m_status)
             res.status(StatusCodes.OK)
             res.json({messages: messages})
 
@@ -600,7 +600,6 @@ app.get('/', async (req, res) => { await get_landing_page(req, res ) })
 const router = express.Router()
 
 router.get('/version', async (req, res) => { await get_version(req, res ) })
-router.get('/admin/users', authenticateToken, async (req, res) => { await list_users(req, res ) })
 router.put('/admin/status', authenticateToken, async (req, res) => { await update_user_status(req, res ) })
 router.post('/admin/broadcast', authenticateToken, async (req, res) => { await admin_broadcast(req, res ) })
 router.delete('/user', authenticateToken, async (req, res) => { await delete_user(req, res ) })

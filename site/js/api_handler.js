@@ -70,17 +70,14 @@ async function create_post(text) {
 }
 
 async function get_post(u_id, amount) {
-    return fetch (path + '/user/post',
+    const url = new URL(`${path}/user/post?u_id=${u_id}&post_amount=${amount}`)
+    return fetch (url.toString(),
         {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             },
             credentials: "same-origin",
-            body: JSON.stringify({
-                u_id: u_id,
-                post_amount: amount
-            })
         })
 }
 
@@ -99,17 +96,14 @@ async function delete_post(p_id) {
 }
 
 async function get_message(sender_id, m_status) {
-    return fetch (path + '/user/message',
+    const url = new URL(`${path}/user/message?sender_id=${sender_id}&m_status=${m_status}`)
+    return fetch (url.toString(),
         {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             },
             credentials: "same-origin",
-            body: JSON.stringify({
-                sender_id: sender_id,
-                m_status: m_status
-            })
         })
 }
 
@@ -136,7 +130,6 @@ async function get_users() {
                 'Content-Type': 'application/json'
             },
             credentials: "same-origin",
-            body: JSON.stringify({})
         })
 }
 
