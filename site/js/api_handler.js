@@ -1,5 +1,15 @@
 const path = "/api"
 
+async function is_logged() {
+    return fetch (path + '/user/logged',
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+}
+
 async function login(email, password) {
     return fetch (path + '/user/login',
         {
@@ -76,7 +86,7 @@ async function get_post(u_id, amount) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            credentials: "same-origin",
+            credentials: "same-origin"
         })
 }
 
@@ -127,7 +137,7 @@ async function get_users() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            credentials: "same-origin",
+            credentials: "same-origin"
         })
 }
 
