@@ -188,36 +188,27 @@ class Header extends React.Component {
 		super(props);
 	}
 
-	handle_posts = e => {
-		this.setState((_prev_state) => (_new_state));
+	handle_posts = e => {		
+		this.props.change_page("homepage");
 	}
 
 	handle_messages = e => {
-		logout()
-		.then((res) => {
-			if (res.ok) {
-				alert("Successfully logged out");
-				this.props.change_login();
-			} else {
-				res.json().then(data => {
-					alert(data.error);
-				});
-			}
-		}).catch();
+		e.preventDefault();
+
 	}
 
 	handle_about = e => {
-		
+		e.preventDefault();
+		this.props.change_page("about");
 	}
 
 	handle_logout = e => {
 		e.preventDefault();
-console.log("looogout");
 		logout()
 		.then((res) => {
 			if (res.ok) {
 				alert("Successfully logged out");
-				this.props.change_login();
+				this.props.change_page("register");
 			} else {
 				res.json().then(data => {
 					alert(data.error);
@@ -233,14 +224,14 @@ console.log("looogout");
 			{ className: "header", id: "header" },
 			React.createElement(
 				"div",
-				{ className: "header-icon", id: "header-icon" }
+				{ className: "header-icon", id: "header-icon", onClick: this.handle_posts }
 			),
 			React.createElement(
 				"div",
 				{ className: "icon-container", id: "icons" },
 				React.createElement(
 					"div",
-					{ className: "posts", id: "posts" },
+					{ className: "posts", id: "posts", onClick: this.handle_posts },
 					
 				),
 				React.createElement(
@@ -250,7 +241,7 @@ console.log("looogout");
 				),
 				React.createElement(
 					"div",
-					{ className: "about", id: "about" },
+					{ className: "about", id: "about", onClick: this.handle_about },
 					
 				),
 				React.createElement(
@@ -272,28 +263,46 @@ class Homepage extends React.Component {
 		return React.createElement(
 			"div",
 			null,
-			React.createElement(Header, {change_login: this.props.change_login.bind(this)}),
+			React.createElement(Header, { change_page: this.props.change_page.bind(this) }),
+			React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }),
 			React.createElement(
 				"div",
-				{ className: "profile-container", id: "profile" },
-				React.createElement(
+				{ className: "posts-container", id: "posts-container" },
+				React.createElement(NewPost),
+				React.createElement(LatestPost),
+				React.createElement(LatestPost),
+				React.createElement(LatestPost),
+				React.createElement(LatestPost),
+				React.createElement(LatestPost),
+			),
+		);
+	}
+}
+
+class About extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+
+	render() {
+		return React.createElement(
+			"div",
+			null,
+			React.createElement(Header, { change_page: this.props.change_page.bind(this) }),
+			React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }), 
+			React.createElement(
 				"div",
-				{ className: "profile-pic", id: "profile-pic" }
-				), 
+				{ className: "posts-container about-container", id: "about" },
 				React.createElement(
 					"div",
-					{ className: "homepage-text", id: "user-info" },
-					"User ID: ",
-					React.createElement("br", null),
-					this.props.u_id,
-					React.createElement("br", null),
-					React.createElement("br", null),
-					"Full name: ",
-					React.createElement("br", null),
-					this.props.full_name,
+					{ className: "post-text" },
+					"About us:",
+				React.createElement("br", null),
+				React.createElement("br", null),
+					"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed tristique quam, et molestie augue. Sed dictum massa interdum, cursus lacus a, mattis ex. Sed laoreet bibendum diam, a malesuada dui auctor et. Aliquam erat volutpat. Nullam ut lectus euismod, viverra enim ac, pretium eros. Proin ultrices massa ac urna condimentum euismod. Morbi sit amet viverra nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Phasellus faucibus nisi condimentum urna vehicula rhoncus. Nunc pharetra mi condimentum nunc semper tincidunt. Curabitur aliquam vel ligula vel ullamcorper.",
+					"Mauris sed est at augue accumsan dignissim. Donec malesuada pulvinar dolor, a vulputate orci malesuada nec. Integer sit amet dolor dapibus, hendrerit neque at, efficitur dui. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur ligula nisl, facilisis eu egestas vel, placerat at nisi. Aliquam sit amet justo eget ipsum dictum iaculis. Vivamus vehicula est eget velit aliquet, vel congue mi porttitor. Fusce vehicula enim in mollis aliquam. Donec imperdiet cursus erat, quis sagittis massa ullamcorper in. Proin mattis, elit nec faucibus porta, nisl massa molestie erat, sed interdum orci quam ut nisi. Duis maximus leo ut nisl consequat faucibus. Vestibulum interdum scelerisque est a scelerisque. Sed non libero quis nulla bibendum pellentesque."
 				),
-			), 
-			React.createElement(NewPost),
+			),
 		);
 	}
 }

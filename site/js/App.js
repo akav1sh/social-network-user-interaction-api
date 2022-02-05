@@ -3,7 +3,7 @@ class App extends React.Component {
 	constructor(props) {
 	  super(props);
 	  this.state = {
-		page: "login"
+		page: "login",
 	  };
 	}
   
@@ -11,13 +11,15 @@ class App extends React.Component {
 	  this.rightSide.classList.add("right");
 	}
 
-	change_login() {
-		this.setState((_prev_state) => ({ page: "register"}));
-		this.change_state();
+	change_page(new_page) {
+		
+		this.setState((_prev_state) => ({ page: new_page}));
+		if (new_page === "register")
+			this.change_state();
 	}
   
 	handle_homepage(id, name) {
-		this.setState(_prev_state => ({ page: "homepage", u_id: id, full_name: name}));
+		this.setState(_prev_state => ({ page: "homepage", u_id: id, full_name: name, profile_pic: Math.floor(Math.random() * 4) + 1}));
 	}
 
 	change_state() {
@@ -47,7 +49,7 @@ class App extends React.Component {
 			  React.createElement(
 				"div",
 				{ className: "container"},
-				page === "login" && React.createElement(Login, { handle_homepage: this.handle_homepage.bind(this),}),
+				page === "login" && React.createElement(Login, { handle_homepage: this.handle_homepage.bind(this) }),
 				page === "register" && React.createElement(Register, { change_state: this.change_state.bind(this) }),
 			  ),
 			  React.createElement(RightSide, {
@@ -57,8 +59,12 @@ class App extends React.Component {
 			  })
 			)
 		  );
-	  } else {
-		page_layout = React.createElement(Homepage, { change_login: this.change_login.bind(this), u_id: this.state.u_id, full_name: this.state.full_name});
+	  } else if (page === "homepage"){
+		page_layout = React.createElement(Homepage, 
+			{ change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
+	  } else if (page === "about"){
+		page_layout = React.createElement(About, 
+			{ change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
 	  }
 	  return page_layout
 	}

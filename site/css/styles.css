@@ -21,6 +21,7 @@ background: #85dcb8;
 
 html,
 body {
+overflow: hidden;
 height: 100%;
 }
 
@@ -238,8 +239,11 @@ button.secondary:hover {
     box-shadow: 5px 4px 12px 2px rgb(15 15 15 / 28%)
   }
 
-  .profile-pic {
-    background-image: url('./images/avatar1.png');
+  .profile-pic1, 
+  .profile-pic2,
+  .profile-pic3,
+  .profile-pic4,
+  .profile-pic5 {
     background-size: cover;
     height: 130px;
     width: 130px;
@@ -250,6 +254,21 @@ button.secondary:hover {
     margin-top: 12%;
     box-shadow: 5px 4px 12px 2px rgb(15 15 15 / 28%);
   }
+  .profile-pic1 {
+    background-image: url('./images/avatar1.png');
+  }
+  .profile-pic2 {
+    background-image: url('./images/avatar2.png');
+  }
+  .profile-pic3 {
+    background-image: url('./images/avatar3.png');
+  }
+  .profile-pic4 {
+    background-image: url('./images/avatar4.png');
+  }
+  .profile-pic5 {
+    background-image: url('./images/avatar5.png');
+  }
 
   .header-icon {
     background-image: url(./images/nerd.png);
@@ -258,6 +277,7 @@ button.secondary:hover {
     height: 55px;
     width: 55px;
     background-size: cover;
+    cursor: pointer;
   }
 
   .icon-container {
@@ -300,19 +320,34 @@ button.secondary:hover {
     background-size: cover;
   }
 
+  .about-container,
   .post-container {
-    height: 13%;
-    width: 75%;
+    height: 14%;
+    width: 100%;
     padding: 15px;
     background: #56997d;
     display: flex;
     flex-direction: column;
-    position: absolute;
-    top: 14%;
-    left: 20%;
+    position: relative;
     font-family: 'Roboto', sans-serif;
     border-radius: 6px;
-    box-shadow: 5px 4px 12px 2px rgb(15 15 15 / 28%)
+    box-shadow: 5px 4px 12px 2px rgb(15 15 15 / 28%);
+  }
+
+  .posts-container {
+    left: 18%;
+    top: 14%;
+    height: 85%;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    row-gap: 1.5em;
+    flex-direction: column;
+  }
+
+  .about-container {
+    height: 40%;
   }
 
 
