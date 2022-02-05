@@ -65,6 +65,9 @@ class App extends React.Component {
 	  } else if (page === "about"){
 		page_layout = React.createElement(About, 
 			{ change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
+	  } else if (page === "admin"){
+		page_layout = React.createElement(Admin, 
+			{ change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
 	  }
 	  return page_layout
 	}
