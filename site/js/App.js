@@ -16,6 +16,7 @@ class App extends React.Component {
 	handle_logged_user() {
 		is_logged()
 		.then((res) => {
+			console.log(res)
 			if (res.ok) {
 				res.json().then((data) => {
 					this.handle_homepage(data.u_id, data.full_name);
