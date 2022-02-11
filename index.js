@@ -505,23 +505,29 @@ async function admin_broadcast(req, res) {
 async function get_user_message(req, res) {
     try {
         if (!req.query.hasOwnProperty('sender_id') ||
-            !req.query.hasOwnProperty('m_status'))
+            !req.query.hasOwnProperty('m_status') ||
+            !req.query.hasOwnProperty('message_amount'))
         {
             res.status(StatusCodes.BAD_REQUEST)
             res.json({error: "Missing information."})
         }
         else if (!secure_validate.is_message_status_valid(req.query.m_status) ||
-            (req.query.sender_id !== all && req.query.sender_id !== admin_id && !secure_validate.is_id_valid(user_type, req.query.sender_id)))
+            (req.query.sender_id !== all && req.query.sender_id !== admin_id && !secure_validate.is_id_valid(user_type, req.query.sender_id)) ||
+            isNaN(parseInt(req.query.message_amount)))
         {
             res.status(StatusCodes.BAD_REQUEST)
             res.json({error: "Invalid sender_id or m_status."})
         }
         else
         {
-            const messages = await user_fs.get_messages(req.token_info.id, req.query.sender_id, req.query.m_status)
+            let messages = await user_fs.get_messages(req.token_info.id, req.query.sender_id, req.query.m_status)
+
+            if(req.query.message_amount !== all) {
+                messages = messages.slice(-req.query.message_amount)
+            }
+
             res.status(StatusCodes.OK)
             res.json({messages: messages})
-
         }
     }catch (err) {
         console.error(err.stack)
