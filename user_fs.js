@@ -256,6 +256,7 @@ async function add_post(poster, post)
             db_json.users.forEach(user => {
                 if(user.u_id === poster.u_id)
                 {
+                    post.full_name = user.full_name
                     post.p_id = get_new_id("post")
                     db_json.max_p_id = post.p_id
                     user.posts.push(post)
