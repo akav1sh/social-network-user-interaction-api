@@ -58,7 +58,7 @@ class App extends React.Component {
 	render() {
 	  	const { page } = this.state;
 		const current = page === "login" ? "Register" : "Login";
-	  	let page_layout;
+	  	let page_layout, page_dislay;
 
 		if (page === "login" || page === "register") {
 			page_layout =  React.createElement(
@@ -80,20 +80,30 @@ class App extends React.Component {
 				  })
 				)
 			  );
-		} else if (page === "homepage"){
-			page_layout = React.createElement(Homepage, 
-				{ change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
-		} else if (page === "about"){
-			page_layout = React.createElement(About, 
-				{ change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
-		} else if (page === "admin"){
-			page_layout = React.createElement(Admin, 
-				{ change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
-		} else if (page === "loading"){
-			page_layout = React.createElement("img", { src: "./css/images/loading.gif" })
-		}
+		} else { 
+			if (page === "homepage"){
+				page_dislay = React.createElement(Homepage, 
+					{ u_id: this.state.u_id });
+			} else if (page === "messages"){
+				page_dislay = React.createElement(MessagesPage);
+			} else if (page === "about"){
+				page_dislay = React.createElement(AboutPage);
+			} else if (page === "admin"){
+				page_dislay = React.createElement(AdminPage, 
+					{ change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
+			} else if (page === "loading"){
+				page_dislay = React.createElement("img", { src: "./css/images/loading.gif" })
+			}
+			
+			page_layout = React.createElement("div", null,
+				React.createElement(Header, { u_id: this.state.u_id, change_page: this.change_page.bind(this) }),
+				React.createElement(Profile, { u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic }),
+				page_dislay);
+		} 
+		
+		
 		return page_layout
-		}
+	}
   }
   
   const RightSide = props => {

@@ -197,8 +197,7 @@ class Header extends React.Component {
 	}
 
 	handle_messages = e => {
-		e.preventDefault();
-
+		this.props.change_page("messages");
 	}
 
 	handle_about = e => {
@@ -246,7 +245,7 @@ class Header extends React.Component {
 				),
 				React.createElement(
 					"div",
-					{ className: "messages", id: "messages" },
+					{ className: "messages", id: "messages", onClick: this.handle_messages },
 				),
 				React.createElement(
 					"div",
@@ -273,11 +272,10 @@ class Homepage extends React.Component {
 	}
 
 	componentDidMount() {
-		this.get_user_post()
-		console.log(this.state)
+		this.get_posts()
 	}
 
-	get_user_post() {
+	get_posts() {
         get_post(this.props.u_id, 1)
         .then((res_user) => {
 			if (res_user.ok) {
@@ -307,55 +305,92 @@ class Homepage extends React.Component {
 		}).catch();
     }
 
-	get_posts() {
-        
-    }
-
 	render() {
-		let page_layout;
+		let page_layout, posts = null;
+
 		if (this.state.loading) {
 			page_layout = page_layout = React.createElement("div", null, "loading");
 		} else {
+			if (this.state.posts) {
+				posts = this.state.posts.map((post, i) => {
+					if (post.p_id !== this.state.user_post.p_id)
+						return React.createElement(Post, { key: i, post: post }) 
+				  });
+			}
+
 			page_layout = React.createElement("div", null,
-				React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
-				React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }),
 				React.createElement("div", { className: "posts-container", id: "posts-container" },
 				React.createElement(NewPost),
 				this.state.user_post ? React.createElement(Post, { post: this.state.user_post }) : null,
-				//this.state.posts ? React.createElement(Post
-				// 	React.createElement(LatestPost, { u_id: this.props.u_id }),
-				// 	const movies_elements = this.props.movies.map((movie, i) => {
-				//         return React.createElement(Movie, { key: i, movie: movie, change_page: this.props.change_page.bind(this) }) 
-				//       });
-				// 	// React.createElement(Post, { amount: 3 }),
-				// ),
-			));
-
+				posts));
 		}
 
 		return page_layout;
 	}
 }
 
-class About extends React.Component {
+class MessagesPage extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			loading: true,
+			messages: null
+		};
+
+	}
+
+	componentDidMount() {
+		this.get_messages()
+	}
+
+	get_messages() {
+        get_message(0, "all")
+        .then((res) => {
+			if (res.ok) {
+                res.json()
+				.then((data) => {
+					if (data.messages[0])
+						this.setState((_prev_state) => ({ loading: false, messages: data.messages }));
+				});
+            } else {
+				res.json().then(data => {
+					alert(data.error);
+				});
+			}
+		}).catch();
+    }
+
+	render() {
+		let page_layout, messages = null;
+		if (this.state.loading) {
+			page_layout = page_layout = React.createElement("div", null, "loading");
+		} else {
+			if (this.state.messages) {
+				messages = this.state.messages.map((message, i) => {
+					return React.createElement(Message, { key: i, message: message }) 
+				  });
+			}
+
+			page_layout = React.createElement("div", null,
+				React.createElement("div", { className: "posts-container", id: "posts-container" },
+				// React.createElement(NewMessage),
+				messages));
+		}
+
+		return page_layout;
+	}
+}
+
+class AboutPage extends React.Component {
 	constructor(props) {
 		super(props);
 	}
 
 	render() {
-		return React.createElement(
-			"div",
-			null,
-			React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
-			React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }), 
-			React.createElement(
-				"div",
-				{ className: "posts-container about-container", id: "about" },
-				React.createElement(
-					"div",
-					{ className: "post-text" },
-					"About us:",
-				React.createElement("br", null),
+		return React.createElement("div", null,
+			React.createElement("div", { className: "posts-container about-container", id: "about" },
+			React.createElement("div", { className: "post-text" }, "About us:",
+			React.createElement("br", null),
 				React.createElement("br", null),
 					"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed tristique quam, et molestie augue. Sed dictum massa interdum, cursus lacus a, mattis ex. Sed laoreet bibendum diam, a malesuada dui auctor et. Aliquam erat volutpat. Nullam ut lectus euismod, viverra enim ac, pretium eros. Proin ultrices massa ac urna condimentum euismod. Morbi sit amet viverra nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Phasellus faucibus nisi condimentum urna vehicula rhoncus. Nunc pharetra mi condimentum nunc semper tincidunt. Curabitur aliquam vel ligula vel ullamcorper.",
 					"Mauris sed est at augue accumsan dignissim. Donec malesuada pulvinar dolor, a vulputate orci malesuada nec. Integer sit amet dolor dapibus, hendrerit neque at, efficitur dui. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur ligula nisl, facilisis eu egestas vel, placerat at nisi. Aliquam sit amet justo eget ipsum dictum iaculis. Vivamus vehicula est eget velit aliquet, vel congue mi porttitor. Fusce vehicula enim in mollis aliquam. Donec imperdiet cursus erat, quis sagittis massa ullamcorper in. Proin mattis, elit nec faucibus porta, nisl massa molestie erat, sed interdum orci quam ut nisi. Duis maximus leo ut nisl consequat faucibus. Vestibulum interdum scelerisque est a scelerisque. Sed non libero quis nulla bibendum pellentesque."
@@ -365,17 +400,15 @@ class About extends React.Component {
 	}
 }
 
-class Admin extends React.Component {
+class AdminPage extends React.Component {
 	constructor(props) {
 		super(props);
 	}
 
 	render() {
-		return React.createElement(
-			"div",
-			null,
-			React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
-			React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }),
+		return React.createElement("div", null,
+			// React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
+			// React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }),
 			
 		);
 	}
