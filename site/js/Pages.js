@@ -264,22 +264,76 @@ class Header extends React.Component {
 class Homepage extends React.Component {
 	constructor(props) {
 		super(props);
+		this.state = {
+			loading: true,
+			user_post: null,
+			posts: null
+		};
+
 	}
 
+	componentDidMount() {
+		this.get_user_post()
+		console.log(this.state)
+	}
+
+	get_user_post() {
+        get_post(this.props.u_id, 1)
+        .then((res_user) => {
+			if (res_user.ok) {
+                res_user.json().then((data_user) => {
+                    if (data_user.posts[0]) {
+						get_post(0, 4)
+						.then((res_posts) => {
+							if (res_posts.ok) {
+								res_posts.json().then((data_posts) => {
+									if (data_posts.posts[0]){
+										this.setState((_prev_state) => ({ loading: false, user_post: data_user.posts[0], posts: data_posts.posts }));
+									}
+								});
+							} else {
+								res.json().then(data => {
+									alert(data.error);
+								});
+							}
+						}).catch();
+					}
+                });
+            } else {
+				res.json().then(data => {
+					alert(data.error);
+				});
+			}
+		}).catch();
+    }
+
+	get_posts() {
+        
+    }
+
 	render() {
-		return React.createElement(
-			"div",
-			null,
-			React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
-			React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }),
-			React.createElement(
-				"div",
-				{ className: "posts-container", id: "posts-container" },
+		let page_layout;
+		if (this.state.loading) {
+			page_layout = page_layout = React.createElement("div", null, "loading");
+		} else {
+			page_layout = React.createElement("div", null,
+				React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
+				React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }),
+				React.createElement("div", { className: "posts-container", id: "posts-container" },
 				React.createElement(NewPost),
-				React.createElement(LatestPost, { u_id: this.props.u_id }),
-				// React.createElement(Post, { amount: 3 }),
-			),
-		);
+				this.state.user_post ? React.createElement(Post, { post: this.state.user_post }) : null,
+				//this.state.posts ? React.createElement(Post
+				// 	React.createElement(LatestPost, { u_id: this.props.u_id }),
+				// 	const movies_elements = this.props.movies.map((movie, i) => {
+				//         return React.createElement(Movie, { key: i, movie: movie, change_page: this.props.change_page.bind(this) }) 
+				//       });
+				// 	// React.createElement(Post, { amount: 3 }),
+				// ),
+			));
+
+		}
+
+		return page_layout;
 	}
 }
 
