@@ -132,8 +132,12 @@ async function get_posts()
                     all_posts = all_posts.concat(relevant_posts)
                 }
             })
-            return all_posts
-
+            return all_posts.sort((p1, p2) => {
+                if (parseInt(p1.p_id) > parseInt(p2.p_id))
+                    return 1
+                else
+                    return -1
+            })
         })
 }
 
