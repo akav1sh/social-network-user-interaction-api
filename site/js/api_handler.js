@@ -144,7 +144,7 @@ async function get_users() {
 async function update_user_status(u_id, u_status) {
     return fetch (path + '/admin/status',
         {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },

@@ -318,7 +318,13 @@ class Homepage extends React.Component {
 		let page_layout, posts = null;
 
 		if (this.state.loading) {
-			page_layout = page_layout = React.createElement("div", null, "loading");
+			page_layout = React.createElement("div", null,
+			React.createElement("div", { className: "posts-container", id: "posts-container" },
+			React.createElement(Post, { post: "loading" }),
+			React.createElement(Post, { post: "loading" }),
+			React.createElement(Post, { post: "loading" }),
+			React.createElement(Post, { post: "loading" }),
+			React.createElement(Post, { post: "loading" })));
 		} else {
 			if (this.state.posts) {
 				posts = this.state.posts.map((post, i) => {

@@ -600,6 +600,7 @@ async function authenticateToken(req, res, next) {
     console.log(token == null)
     req.token = token
     console.log(req.token)
+    
 
     if (token == null)
     {

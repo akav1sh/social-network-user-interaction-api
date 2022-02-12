@@ -70,9 +70,16 @@ class Post extends React.Component {
 	}
 
     render() {
-        return React.createElement("div", { className: "post-container" },
+        let layout;
+        if (this.props.post === "loading") {
+            layout = React.createElement("img", { src: "css/images/animation.gif", alt: "Italian Trulli" });
+        } else {
+            layout = React.createElement("div", { className: "post-container" },
             React.createElement("div", { className: "post-text" }, "A post from " + this.props.post.full_name + ":",
             React.createElement("br", null), this.props.post.text,));
+        }
+        
+        return layout;
     }
 }
 
@@ -216,6 +223,7 @@ class UserStatus extends React.Component {
 		.then((res) => {
 			if (res.ok) {
 				alert("Status successfully updated");
+                console.log(document.cookie)
 			} else {
 				res.json().then(data => {
 					alert(data.error);
