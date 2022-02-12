@@ -321,7 +321,7 @@ async function login_user(req, res) {
                 const res_data = secure_validate.create_token(user)
                 res_data.u_id = user.u_id
                 res_data.full_name = user.full_name
-                res.setHeader('Set-Cookie', [`token=${res_data.token}`])
+                res.cookie('token', res_data.token, {path: '/api'})
                 await user_fs.add_token(res_data.token)
                 res.status(StatusCodes.OK)
                 res.json(res_data)
@@ -581,31 +581,26 @@ async function send_user_message(req, res) {
 //TODO add try carch
 // This is a middleware function to make sure authentication is valid
 async function authenticateToken(req, res, next) {
-    let token
-    if("authorization" in req.headers)
-    {
-        const authHeader = req.headers.authorization
-        token = authHeader.split(' ')[1]
-    }
-    else if(req.headers.cookie)
-    {
-        const cookie = req.headers.cookie
-        token = cookie.split(/; */).find(cookie => cookie.split('=')[0] === 'token').split('=')[1]
-    }
-    else
-    {
-        token = null
-    }
-    console.log(token)
-    console.log(token == null)
-    req.token = token
-    console.log(req.token)
-    
+    try {
+        let token
+        if ("authorization" in req.headers) {
+            const authHeader = req.headers.authorization
+            token = authHeader.split(' ')[1]
+        } else if (req.headers.cookie) {
+            const cookie = req.headers.cookie
+            token = cookie.split(/; */).find(cookie => cookie.split('=')[0] === 'token').split('=')[1]
+        } else {
+            token = null
+        }
+        req.token = token
 
-    if (token == null)
-    {
-        res.status(StatusCodes.UNAUTHORIZED)
-        return res.json({error: "Forbidden"})
+        if (token == null) {
+            res.status(StatusCodes.UNAUTHORIZED)
+            return res.json({error: "Unauthorized"})
+        }
+    }catch (err){
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Might be a token issue."})
     }
 
     try {
