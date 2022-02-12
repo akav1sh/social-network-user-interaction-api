@@ -581,27 +581,26 @@ async function send_user_message(req, res) {
 //TODO add try carch
 // This is a middleware function to make sure authentication is valid
 async function authenticateToken(req, res, next) {
-    let token
-    if("authorization" in req.headers)
-    {
-        const authHeader = req.headers.authorization
-        token = authHeader.split(' ')[1]
-    }
-    else if(req.headers.cookie)
-    {
-        const cookie = req.headers.cookie
-        token = cookie.split(/; */).find(cookie => cookie.split('=')[0] === 'token').split('=')[1]
-    }
-    else
-    {
-        token = null
-    }
-    req.token = token
+    try {
+        let token
+        if ("authorization" in req.headers) {
+            const authHeader = req.headers.authorization
+            token = authHeader.split(' ')[1]
+        } else if (req.headers.cookie) {
+            const cookie = req.headers.cookie
+            token = cookie.split(/; */).find(cookie => cookie.split('=')[0] === 'token').split('=')[1]
+        } else {
+            token = null
+        }
+        req.token = token
 
-    if (token == null)
-    {
-        res.status(StatusCodes.UNAUTHORIZED)
-        return res.json({error: "Forbidden"})
+        if (token == null) {
+            res.status(StatusCodes.UNAUTHORIZED)
+            return res.json({error: "Unauthorized"})
+        }
+    }catch (err){
+        res.status(StatusCodes.BAD_REQUEST)
+        res.json({error: "Might be a token issue."})
     }
 
     try {
