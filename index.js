@@ -251,7 +251,6 @@ async function update_user_status( req, res ) {
         {
             const u_id = req.token_info.id
             const user_to_update = await user_fs.find_user_by_id(req.body.u_id)
-
             if (u_id !== admin_id)
             {
                 res.status(StatusCodes.FORBIDDEN)
@@ -579,6 +578,7 @@ async function send_user_message(req, res) {
     }
 }
 
+//TODO add try carch
 // This is a middleware function to make sure authentication is valid
 async function authenticateToken(req, res, next) {
     let token
@@ -596,7 +596,11 @@ async function authenticateToken(req, res, next) {
     {
         token = null
     }
+    console.log(token)
+    console.log(token == null)
     req.token = token
+    console.log(req.token)
+
     if (token == null)
     {
         res.status(StatusCodes.UNAUTHORIZED)

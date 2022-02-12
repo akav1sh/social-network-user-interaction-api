@@ -104,8 +104,8 @@ async function delete_post(p_id) {
         })
 }
 
-async function get_message(sender_id, m_status) {
-    return fetch (`${path}/user/message?sender_id=${sender_id}&m_status=${m_status}`,
+async function get_message(sender_id, m_status, message_amount) {
+    return fetch (`${path}/user/message?sender_id=${sender_id}&m_status=${m_status}&message_amount=${message_amount}`,
         {
             method: 'GET',
             headers: {

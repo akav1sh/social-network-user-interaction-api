@@ -20,6 +20,7 @@ class NewPost extends React.Component {
 		.then((res) => {
 			if (res.ok) {
 				alert("Post successfull");
+                this.props.update_homepage();
 			} else {
 				res.json().then(data => {
 					alert(data.error);
@@ -49,8 +50,7 @@ class NewPost extends React.Component {
                         "div",
                         { className: "input-group" },
                         React.createElement("input",
-                        { className: "post-input", type: "text", name: "post", placeholder: "I'm feeling..." }
-                        ),
+                        { className: "post-input", type: "text", name: "post", placeholder: "I'm feeling..." }),
                     ),
                     React.createElement(
                         "button",
@@ -76,6 +76,123 @@ class Post extends React.Component {
     }
 }
 
+class NewMessage extends React.Component {
+    constructor(props) {
+		super(props);
+	}
+
+    handle_message = e => {
+		e.preventDefault(e.target.id.value);
+
+		send_message(e.target.id.value, e.target.message.value)
+		.then((res) => {
+			if (res.ok) {
+				alert("Message successfull");
+                this.props.update_page();
+			} else {
+				res.json().then(data => {
+					alert(data.error);
+				});
+			}
+			e.target.id.value = "";
+            e.target.message.value = "";
+		}).catch();
+
+	}
+
+    render() {
+        return React.createElement(
+            "div",
+            { className: "post-container", id: "write-post" },
+            React.createElement(
+                "form",
+                { className: "form", onSubmit: this.handle_message },
+            React.createElement(
+                "div",
+                { className: "post-text" },
+                "Write a message:"
+                ),
+                React.createElement(
+                    "div",
+                    { className: "flex-box" },
+                    React.createElement(
+                        "div",
+                        { className: "input-group" },
+                        React.createElement("input",
+                        { className: "post-input", type: "text", name: "id", placeholder: "User ID" })
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "input-group" },
+                        React.createElement("input",
+                        { className: "post-input", type: "text", name: "message", placeholder: "Heartfelt message..." }),
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary" },
+                        "Send"
+                    ),	
+                ),
+              ),
+        );
+    }
+}
+
+
+class Broadcast extends React.Component {
+    constructor(props) {
+		super(props);
+	}
+
+    handle_message = e => {
+		e.preventDefault(e.target.id.value);
+
+		broadcast_message(e.target.broadcast.value)
+		.then((res) => {
+			if (res.ok) {
+				alert("Broadcast successfull");
+			} else {
+				res.json().then(data => {
+					alert(data.error);
+				});
+			}
+            e.target.broadcast.value = "";
+		}).catch();
+
+	}
+
+    render() {
+        return React.createElement(
+            "div",
+            { className: "post-container", id: "write-post" },
+            React.createElement(
+                "form",
+                { className: "form", onSubmit: this.handle_message },
+            React.createElement(
+                "div",
+                { className: "post-text" },
+                "Write a broadcast:"
+                ),
+                React.createElement(
+                    "div",
+                    { className: "flex-box" },
+                    React.createElement(
+                        "div",
+                        { className: "input-group" },
+                        React.createElement("input",
+                        { className: "post-input", type: "text", name: "broadcast", placeholder: "Important notice..." }),
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary" },
+                        "Send"
+                    ),	
+                ),
+              ),
+        );
+    }
+}
+
 class Message extends React.Component {
     constructor(props) {
         super(props);
@@ -83,10 +200,74 @@ class Message extends React.Component {
 
     render() {
         return React.createElement("div", { className: "post-container" },
-            React.createElement("div", { className: "post-text" }, "A message from " + this.props.message.sender_id + ":",
+            React.createElement("div", { className: "post-text" }, "A message from user id " + this.props.message.sender_id + ":",
             React.createElement("br", null), this.props.message.text,));
     }
 }
+
+class UserStatus extends React.Component {
+    constructor(props) {
+		super(props);
+	}
+
+    handle_status = e => {
+        e.preventDefault(e.target);
+		update_user_status(e.target.id.value, e.nativeEvent.submitter.name)
+		.then((res) => {
+			if (res.ok) {
+				alert("Status successfully updated");
+			} else {
+				res.json().then(data => {
+					alert(data.error);
+				});
+			}
+			e.target.id.value = "";
+		}).catch();
+
+	}
+
+    render() {
+        return React.createElement(
+            "div",
+            { className: "post-container", id: "write-post" },
+            React.createElement(
+                "form",
+                { className: "form", onSubmit: this.handle_status },
+            React.createElement(
+                "div",
+                { className: "post-text" },
+                "Write a message:"
+                ),
+                React.createElement(
+                    "div",
+                    { className: "flex-box" },
+                    React.createElement(
+                        "div",
+                        { className: "input-group" },
+                        React.createElement("input",
+                        { className: "post-input", type: "text", name: "id", placeholder: "User ID" })
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary", name: "active"},
+                        "Activate"
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary", name: "suspended" },
+                        "Suspend"
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary", name: "deleted" },
+                        "Delete"
+                    ),	
+                ),
+              ),
+        );
+    }
+}
+
 
 class Profile extends React.Component {
     constructor(props) {

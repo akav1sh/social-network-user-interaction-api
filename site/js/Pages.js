@@ -188,15 +188,19 @@ class Header extends React.Component {
 		super(props);
 	}
 
-	handle_admin = e => {		
-		this.props.change_page("admin");
+	handle_admin = e => {	
+		e.preventDefault();
+		if (this.props.u_id === "1")	
+			this.props.change_page("admin");
 	}
 
 	handle_posts = e => {		
-		this.props.change_page("homepage");
+		e.preventDefault();
+		this.props.handle_homepage(this.props.u_id, this.props.full_name);
 	}
 
 	handle_messages = e => {
+		e.preventDefault();
 		this.props.change_page("messages");
 	}
 
@@ -275,6 +279,10 @@ class Homepage extends React.Component {
 		this.get_posts()
 	}
 
+	update_homepage() {
+		this.get_posts()
+	}
+
 	get_posts() {
         get_post(this.props.u_id, 1)
         .then((res_user) => {
@@ -285,6 +293,7 @@ class Homepage extends React.Component {
 						.then((res_posts) => {
 							if (res_posts.ok) {
 								res_posts.json().then((data_posts) => {
+									console.log(data_posts.posts) //TODO remove log
 									if (data_posts.posts[0]){
 										this.setState((_prev_state) => ({ loading: false, user_post: data_user.posts[0], posts: data_posts.posts }));
 									}
@@ -320,9 +329,9 @@ class Homepage extends React.Component {
 
 			page_layout = React.createElement("div", null,
 				React.createElement("div", { className: "posts-container", id: "posts-container" },
-				React.createElement(NewPost),
+				React.createElement(NewPost, { update_homepage: this.update_homepage.bind(this) }),
 				this.state.user_post ? React.createElement(Post, { post: this.state.user_post }) : null,
-				posts));
+				posts.reverse()));
 		}
 
 		return page_layout;
@@ -343,8 +352,12 @@ class MessagesPage extends React.Component {
 		this.get_messages()
 	}
 
+	update_messagepage() {
+		this.get_messages()
+	}
+
 	get_messages() {
-        get_message(0, "all")
+        get_message(0, "all", 4)
         .then((res) => {
 			if (res.ok) {
                 res.json()
@@ -372,9 +385,9 @@ class MessagesPage extends React.Component {
 			}
 
 			page_layout = React.createElement("div", null,
-				React.createElement("div", { className: "posts-container", id: "posts-container" },
-				// React.createElement(NewMessage),
-				messages));
+				React.createElement("div", { className: "posts-container", id: "message-container" },
+				React.createElement(NewMessage, { update_page: this.update_messagepage.bind(this) }),
+				messages.reverse()));
 		}
 
 		return page_layout;
@@ -407,8 +420,9 @@ class AdminPage extends React.Component {
 
 	render() {
 		return React.createElement("div", null,
-			// React.createElement(Header, { u_id: this.props.u_id, change_page: this.props.change_page.bind(this) }),
-			// React.createElement(Profile, { u_id: this.props.u_id, full_name: this.props.full_name, profile_pic: this.props.profile_pic }),
+			React.createElement("div", { className: "posts-container" },
+			React.createElement(Broadcast),
+			React.createElement(UserStatus)),
 			
 		);
 	}

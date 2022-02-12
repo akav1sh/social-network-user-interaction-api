@@ -82,8 +82,7 @@ class App extends React.Component {
 			  );
 		} else { 
 			if (page === "homepage"){
-				page_dislay = React.createElement(Homepage, 
-					{ u_id: this.state.u_id });
+				page_dislay = React.createElement(Homepage, { u_id: this.state.u_id });
 			} else if (page === "messages"){
 				page_dislay = React.createElement(MessagesPage);
 			} else if (page === "about"){
@@ -96,7 +95,7 @@ class App extends React.Component {
 			}
 			
 			page_layout = React.createElement("div", null,
-				React.createElement(Header, { u_id: this.state.u_id, change_page: this.change_page.bind(this) }),
+				React.createElement(Header, { u_id: this.state.u_id, full_name: this.state.full_name, change_page: this.change_page.bind(this), handle_homepage: this.handle_homepage.bind(this) }),
 				React.createElement(Profile, { u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic }),
 				page_dislay);
 		} 
