@@ -321,7 +321,7 @@ async function login_user(req, res) {
                 const res_data = secure_validate.create_token(user)
                 res_data.u_id = user.u_id
                 res_data.full_name = user.full_name
-                res.setHeader('Set-Cookie', [`token=${res_data.token}`])
+                res.cookie('token', res_data.token, {path: '/api'})
                 await user_fs.add_token(res_data.token)
                 res.status(StatusCodes.OK)
                 res.json(res_data)
@@ -596,10 +596,7 @@ async function authenticateToken(req, res, next) {
     {
         token = null
     }
-    console.log(token)
-    console.log(token == null)
     req.token = token
-    console.log(req.token)
 
     if (token == null)
     {
