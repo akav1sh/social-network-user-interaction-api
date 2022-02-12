@@ -206,9 +206,15 @@ class Message extends React.Component {
     }
 
     render() {
-        return React.createElement("div", { className: "post-container" },
+        let layout;
+        if (this.props.post === "loading") {
+            layout = React.createElement("img", { src: "css/images/animation.gif", alt: "Italian Trulli" });
+        } else {
+            layout = React.createElement("div", { className: "post-container" },
             React.createElement("div", { className: "post-text" }, "A message from user id " + this.props.message.sender_id + ":",
             React.createElement("br", null), this.props.message.text,));
+        }
+        return layout
     }
 }
 
