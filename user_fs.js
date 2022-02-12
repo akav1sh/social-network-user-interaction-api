@@ -127,10 +127,17 @@ async function get_posts()
             const db_json = JSON.parse(res.toString('utf-8'))
             let all_posts = []
             db_json.users.forEach(user => {
-                all_posts = all_posts.concat(user.posts)
-            });
-            return all_posts
-
+                if(user.u_status === "active") {
+                    const relevant_posts = user.posts.filter(post => post.p_status === "active")
+                    all_posts = all_posts.concat(relevant_posts)
+                }
+            })
+            return all_posts.sort((p1, p2) => {
+                if (parseInt(p1.p_id) > parseInt(p2.p_id))
+                    return 1
+                else
+                    return -1
+            })
         })
 }
 

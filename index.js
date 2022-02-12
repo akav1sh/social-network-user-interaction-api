@@ -440,7 +440,7 @@ async function get_user_post(req, res) {
             else
                 posts = await user_fs.get_posts()
 
-
+            console.log(posts)
             if (post_amount !== all)
                 posts = posts.slice(-post_amount)
 
@@ -578,7 +578,6 @@ async function send_user_message(req, res) {
     }
 }
 
-//TODO add try carch
 // This is a middleware function to make sure authentication is valid
 async function authenticateToken(req, res, next) {
     try {
@@ -600,11 +599,11 @@ async function authenticateToken(req, res, next) {
         }
     }catch (err){
         res.status(StatusCodes.BAD_REQUEST)
-        res.json({error: "Might be a token issue."})
+        return res.json({error: "Might be a token issue."})
     }
 
     try {
-        req.token_info = await secure_validate.verify_token(token)
+        req.token_info = await secure_validate.verify_token(req.token)
         const user = await user_fs.find_user_by_id(req.token_info.id)
         if (user.u_status !== "active")
             throw Error("Status is not active.")
