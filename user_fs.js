@@ -127,8 +127,11 @@ async function get_posts()
             const db_json = JSON.parse(res.toString('utf-8'))
             let all_posts = []
             db_json.users.forEach(user => {
-                all_posts = all_posts.concat(user.posts)
-            });
+                if(user.u_status === "active") {
+                    const relevant_posts = user.posts.filter(post => post.p_status === "active")
+                    all_posts = all_posts.concat(relevant_posts)
+                }
+            })
             return all_posts
 
         })
