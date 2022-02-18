@@ -25,6 +25,8 @@ class App extends React.Component {
 				if (post_res.ok) {
 					post_res.json()
 					.then((post_data) => {
+						console.log("last msg id:")
+						console.log(this.state.last_msg_id)
 						if (this.state.last_msg_id) {
 							// console.log("lst mssg id:" + this.state.last_msg_id)
 							get_message(0, "unread", 1)
@@ -41,7 +43,7 @@ class App extends React.Component {
 												 && this.state.msg_id !== msg_data.messages[0].m_id)
 											this.setState(prev_state => ({ prev_state, msg_bell: true, pst_bell: false }));
 										else if (post_data.posts[0] 
-												 && this.state.post_id !== post_data.posts[0].p_id)
+												 && this.state.last_post_id !== post_data.posts[0].p_id)
 											this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: true }));
 										else
 											this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: false }));
@@ -53,7 +55,7 @@ class App extends React.Component {
 							}).catch();
 						}
 						else if (post_data.posts[0] 
-							 	 && this.state.post_id !== post_data.posts[0].p_id)
+							 	 && this.state.last_post_id !== post_data.posts[0].p_id)
 					   		this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: true }));
 						else
 					   		this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: false }));

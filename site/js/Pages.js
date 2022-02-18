@@ -300,12 +300,16 @@ class Homepage extends React.Component {
 									if (data_posts.posts[0]) {
 										this.props.save_last_post_id(data_posts.posts[data_posts.posts.length - 1].p_id);
 										this.setState((_prev_state) => ({ loading: false, user_post: data_user.posts[0], posts: data_posts.posts }));
+									} else {
+										//TODO
 									}
 								});
 							} else {
 								this.props.change_page("register");
 							}
 						}).catch();
+					} else {
+						//TODO
 					}
                 });
             } else {
@@ -371,6 +375,8 @@ class MessagesPage extends React.Component {
 					if (data.messages[0]) {
 						this.props.save_last_msg_id(data.messages[data.messages.length - 1].m_id);
 						this.setState((_prev_state) => ({ loading: false, messages: data.messages }));
+					} else {
+						//TODO
 					}
 				});
             } else {
