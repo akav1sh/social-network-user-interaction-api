@@ -4,7 +4,9 @@ class App extends React.Component {
 		super(props);
 		this.state = {
 		  page: "loading",
-		  timerId: null
+		  timerId: null,
+		  last_post_id: null,
+		  last_msg_id: null
 		};
 		this.notification = this.notification.bind(this);
 		this.handle_logged_user();
@@ -12,11 +14,11 @@ class App extends React.Component {
   
 	componentDidMount() {
 		if (this.state.page === "login")
-			this.rightSide.classList.add("right");
+			this.rightSide.classList.add("right");			
 	}
 
 	notification() {
-		// clearInterval(this.state.timerId);
+		let msg_bell, pst_bell;
 		if (this.state.last_post_id) {
 			get_post(0, 1)
 			.then((post_res) => {
@@ -32,16 +34,27 @@ class App extends React.Component {
 										if (msg_data.messages[0] 
 											&& post_data.posts[0] 
 											&& this.state.last_post_id !== post_data.posts[0].p_id
-											&& this.state.last_msg_id !== msg_data.messages[0].m_id) 
-											this.setState(prev_state => ({ prev_state, msg_bell: true, pst_bell: true }))
+											&& this.state.last_msg_id !== msg_data.messages[0].m_id) {
+												msg_bell = true;
+												pst_bell = true;
+											}
 										else if (msg_data.messages[0] 
-												 && this.state.last_msg_id !== msg_data.messages[0].m_id)
-											this.setState(prev_state => ({ prev_state, msg_bell: true, pst_bell: false }));
+												 && this.state.last_msg_id !== msg_data.messages[0].m_id) {
+													msg_bell = true;
+													pst_bell = false;
+												 }
 										else if (post_data.posts[0] 
-												 && this.state.last_post_id !== post_data.posts[0].p_id)
-											this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: true }));
-										else
-											this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: false }));
+												 && this.state.last_post_id !== post_data.posts[0].p_id) {
+													msg_bell = false;
+													pst_bell = true;
+												 }
+										else {
+											msg_bell = false;
+											pst_bell = false;
+										}
+
+										if (this.state.msg_bell !== msg_bell || this.state.pst_bell !== pst_bell)
+											this.setState(prev_state => ({ prev_state, msg_bell: msg_bell, pst_bell: pst_bell }));
 									});
 								} else {
 									//TODO
@@ -49,23 +62,64 @@ class App extends React.Component {
 							}).catch();
 						}
 						else if (post_data.posts[0] 
-							 	 && this.state.last_post_id !== post_data.posts[0].p_id)
-					   		this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: true }));
-						else
-					   		this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: false }));
+							 	 && this.state.last_post_id !== post_data.posts[0].p_id) {
+									msg_bell = false;
+									pst_bell = true;
+								  }
+						else {
+							msg_bell = false;
+							pst_bell = false;
+						}
+
+						if (!this.state.last_msg_id && (this.state.msg_bell !== msg_bell || this.state.pst_bell !== pst_bell))
+							this.setState(prev_state => ({ prev_state, msg_bell: msg_bell, pst_bell: pst_bell }));
 					});
 				} else {
 					//TODO
 				}
 			}).catch();
 		}
-		
-
-
-		//msg_bell, pst_bell
-		//this.setState(prev_state => ({ prev_state, notification: false }));
-
 	}
+
+	get_posts(id, name) {
+		let user_post, posts;
+		if (id) {
+			get_post(id, 1)
+			.then((res_user) => {
+				if (res_user.ok) {
+					res_user.json().then((data_user) => {
+						get_post(0, 4)
+						.then((res_posts) => {
+							if (res_posts.ok) {
+								res_posts.json().then((data_posts) => {
+									if (data_posts.posts[0] && data_user.posts[0]) {
+										this.save_last_post_id(data_posts.posts[data_posts.posts.length - 1].p_id);
+										user_post = data_user.posts[0];
+										posts = data_posts.posts;
+									} else if (data_posts.posts[0]) {
+										this.save_last_post_id(data_posts.posts[data_posts.posts.length - 1].p_id);
+										user_post = null;
+										posts = data_posts.posts;
+									} else if (data_user.posts[0]) {
+										user_post = data_user.posts[0];
+										posts = null;
+									} else {
+										user_post = null;
+										posts = null;
+									}
+									this.handle_homepage(id, name, user_post, posts)
+								});
+							} else {
+								this.change_page("register");
+							}
+						}).catch();
+					});
+				} else {
+					this.change_page("register")
+				}
+			}).catch();
+		}
+    }
 
 	handle_logged_user() {
 		is_logged()
@@ -79,11 +133,11 @@ class App extends React.Component {
 							.then((data) => {
 								if (data.messages[0]) 
 									this.save_last_msg_id(data.messages[0].m_id);
-								this.state.timerId = setInterval(this.notification, 1000);
+								this.state.timerId = setInterval(this.notification, 5000);
 							});
 						}
+						this.get_posts(data.u_id, data.full_name);
 					}).catch();
-					this.handle_homepage(data.u_id, data.full_name);
 				});
 			} else {
 				this.change_page("register")
@@ -92,11 +146,11 @@ class App extends React.Component {
 	}
 
 	save_last_post_id(post_id) {
-		this.setState(prev_state => ({ prev_state, last_post_id: post_id }));
+		this.state.last_post_id = post_id;
 	}
 
 	save_last_msg_id(msg_id) {
-		this.setState(prev_state => ({ prev_state, last_msg_id: msg_id }));
+		this.state.last_msg_id = msg_id;
 	}
 
 	change_page(new_page) {
@@ -108,9 +162,8 @@ class App extends React.Component {
 		}
 	}
   
-	handle_homepage(id, name) {
-
-		this.setState(_prev_state => ({ page: "homepage", u_id: id, full_name: name, profile_pic: Math.floor(Math.random() * 4) + 1}));
+	handle_homepage(id, name, user_post, posts) {
+		this.setState(_prev_state => ({ page: "homepage", u_id: id, full_name: name, profile_pic: Math.floor(Math.random() * 4) + 1, user_post: user_post, posts: posts }));
 	}
 
 	change_state() {
@@ -145,7 +198,7 @@ class App extends React.Component {
 				  React.createElement(
 					"div",
 					{ className: "container"},
-					page === "login" && React.createElement(Login, { handle_homepage: this.handle_homepage.bind(this) }),
+					page === "login" && React.createElement(Login, { handle_logged_user: this.handle_logged_user.bind(this) }),
 					page === "register" && React.createElement(Register, { change_state: this.change_state.bind(this) }),
 				  ),
 				  React.createElement(RightSide, {
@@ -157,20 +210,22 @@ class App extends React.Component {
 			  );
 		} else { 
 			if (page === "homepage"){
-				page_dislay = React.createElement(Homepage, { u_id: this.state.u_id, change_page: this.change_page.bind(this), save_last_post_id: this.save_last_post_id.bind(this) });
+				page_dislay = React.createElement(Homepage, { get_posts: this.get_posts.bind(this), 
+					u_id: this.state.u_id, full_name: this.state.full_name, user_post: this.state.user_post, posts: this.state.posts });
 			} else if (page === "messages"){
 				page_dislay = React.createElement(MessagesPage, { change_page: this.change_page.bind(this), save_last_msg_id: this.save_last_msg_id.bind(this) });
 			} else if (page === "about"){
 				page_dislay = React.createElement(AboutPage);
 			} else if (page === "admin"){
-				page_dislay = React.createElement(AdminPage, { change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
+				page_dislay = React.createElement(AdminPage, { change_page: this.change_page.bind(this),
+					 u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
 			} else if (page === "loading"){
 				page_dislay = React.createElement("img", { src: "./css/images/loading.gif" })
 			}
 			
 			page_layout = React.createElement("div", null,
 				React.createElement(Header, { u_id: this.state.u_id, full_name: this.state.full_name,
-					 msg_bell: this.state.msg_bell, pst_bell: this.state.pst_bell, change_page: this.change_page.bind(this), handle_homepage: this.handle_homepage.bind(this) }),
+					 msg_bell: this.state.msg_bell, pst_bell: this.state.pst_bell, change_page: this.change_page.bind(this), get_posts: this.get_posts.bind(this) }),
 				React.createElement(Profile, { u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic }),
 				page_dislay);
 		} 

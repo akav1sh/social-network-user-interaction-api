@@ -10,7 +10,8 @@ class NewPost extends React.Component {
 		.then((res) => {
 			if (res.ok) {
 				alert("Post successfull");
-                this.props.update_homepage();
+                console.log(this.props.u_id)
+                this.props.get_posts(this.props.u_id, this.props.full_name);
 			} else {
 				res.json().then(data => {
 					alert(data.error);
