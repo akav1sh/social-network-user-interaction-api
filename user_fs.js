@@ -160,8 +160,8 @@ async function get_messages(requesting_user_id, sender_id, status)
                 messages = messages.filter(message => message.m_status === status)
                 messages.forEach(message => message.m_status = "read")
             await fs.writeFile(db_file, JSON.stringify(db_json))
-            return messages.sort((p1, p2) => {
-                if (parseInt(p1.p_id) > parseInt(p2.p_id))
+            return messages.sort((m1, m2) => {
+                if (parseInt(m1.m_id) > parseInt(m2.m_id))
                     return 1
                 else
                     return -1
