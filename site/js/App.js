@@ -4,15 +4,73 @@ class App extends React.Component {
 		super(props);
 		this.state = {
 		  page: "loading",
+		  timerId: null
 		};
+		this.notification = this.notification.bind(this);
 		this.handle_logged_user();
 	}
   
 	componentDidMount() {
 		if (this.state.page === "login")
 			this.rightSide.classList.add("right");
+
+		this.state.timerId = setInterval(this.notification, 1000);
 	}
-	
+
+	notification() {
+		// clearInterval(this.state.timerId);
+		if (this.state.last_post_id) {
+			get_post(0, 1)
+			.then((post_res) => {
+				if (post_res.ok) {
+					post_res.json()
+					.then((post_data) => {
+						if (this.state.last_msg_id) {
+							// console.log("lst mssg id:" + this.state.last_msg_id)
+							get_message(0, "unread", 1)
+							.then((msg_res) => {
+								if (msg_res.ok) {
+									msg_res.json()
+									.then((msg_data) => {
+										if (msg_data.messages[0] 
+											&& post_data.posts[0] 
+											&& this.state.last_post_id !== post_data.posts[0].p_id
+											&& this.state.last_msg_id !== msg_data.messages[0].m_id) 
+											this.setState(prev_state => ({ prev_state, msg_bell: true, pst_bell: true }))
+										else if (msg_data.messages[0] 
+												 && this.state.msg_id !== msg_data.messages[0].m_id)
+											this.setState(prev_state => ({ prev_state, msg_bell: true, pst_bell: false }));
+										else if (post_data.posts[0] 
+												 && this.state.post_id !== post_data.posts[0].p_id)
+											this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: true }));
+										else
+											this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: false }));
+										// console.log(this.state)
+									});
+								} else {
+									//TODO
+								}
+							}).catch();
+						}
+						else if (post_data.posts[0] 
+							 	 && this.state.post_id !== post_data.posts[0].p_id)
+					   		this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: true }));
+						else
+					   		this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: false }));
+					});
+				} else {
+					//TODO
+				}
+			}).catch();
+		}
+		
+
+
+		//msg_bell, pst_bell
+		//this.setState(prev_state => ({ prev_state, notification: false }));
+
+	}
+
 	handle_logged_user() {
 		is_logged()
 		.then((res) => {
@@ -24,6 +82,14 @@ class App extends React.Component {
 				this.change_page("register")
 			}
 		}).catch();
+	}
+
+	save_last_post_id(post_id) {
+		this.setState(prev_state => ({ prev_state, last_post_id: post_id }));
+	}
+
+	save_last_msg_id(msg_id) {
+		this.setState(prev_state => ({ prev_state, last_msg_id: msg_id }));
 	}
 
 	change_page(new_page) {
@@ -82,20 +148,20 @@ class App extends React.Component {
 			  );
 		} else { 
 			if (page === "homepage"){
-				page_dislay = React.createElement(Homepage, { u_id: this.state.u_id });
+				page_dislay = React.createElement(Homepage, { u_id: this.state.u_id, change_page: this.change_page.bind(this), save_last_post_id: this.save_last_post_id.bind(this) });
 			} else if (page === "messages"){
-				page_dislay = React.createElement(MessagesPage);
+				page_dislay = React.createElement(MessagesPage, { change_page: this.change_page.bind(this), save_last_msg_id: this.save_last_msg_id.bind(this) });
 			} else if (page === "about"){
 				page_dislay = React.createElement(AboutPage);
 			} else if (page === "admin"){
-				page_dislay = React.createElement(AdminPage, 
-					{ change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
+				page_dislay = React.createElement(AdminPage, { change_page: this.change_page.bind(this), u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
 			} else if (page === "loading"){
 				page_dislay = React.createElement("img", { src: "./css/images/loading.gif" })
 			}
 			
 			page_layout = React.createElement("div", null,
-				React.createElement(Header, { u_id: this.state.u_id, full_name: this.state.full_name, change_page: this.change_page.bind(this), handle_homepage: this.handle_homepage.bind(this) }),
+				React.createElement(Header, { u_id: this.state.u_id, full_name: this.state.full_name,
+					 msg_bell: this.state.msg_bell, pst_bell: this.state.pst_bell, change_page: this.change_page.bind(this), handle_homepage: this.handle_homepage.bind(this) }),
 				React.createElement(Profile, { u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic }),
 				page_dislay);
 		} 

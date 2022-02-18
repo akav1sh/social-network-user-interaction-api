@@ -226,12 +226,14 @@ class Header extends React.Component {
 
 	
 	render() {
-		let admin;
+		let admin, msg_bell, pst_bell;
 		if (this.props.u_id === "1")
-			admin = React.createElement(
-				"div",
-				{ className: "admin", id: "admin", onClick: this.handle_admin },	
-			);
+			admin = React.createElement("div", { className: "admin", id: "admin", onClick: this.handle_admin });
+		if (this.props.msg_bell)
+			msg_bell = React.createElement("div", { className: "notification" });
+		if (this.props.pst_bell)
+			pst_bell = React.createElement("div", { className: "notification" });
+
 		return React.createElement(
 			"div",
 			{ className: "header", id: "header" },
@@ -246,10 +248,12 @@ class Header extends React.Component {
 				React.createElement(
 					"div",
 					{ className: "posts", id: "posts", onClick: this.handle_posts },
+					pst_bell
 				),
 				React.createElement(
 					"div",
 					{ className: "messages", id: "messages", onClick: this.handle_messages },
+					msg_bell
 				),
 				React.createElement(
 					"div",
@@ -293,23 +297,19 @@ class Homepage extends React.Component {
 						.then((res_posts) => {
 							if (res_posts.ok) {
 								res_posts.json().then((data_posts) => {
-									console.log(data_posts.posts) //TODO remove log
-									if (data_posts.posts[0]){
+									if (data_posts.posts[0]) {
+										this.props.save_last_post_id(data_posts.posts[data_posts.posts.length - 1].p_id);
 										this.setState((_prev_state) => ({ loading: false, user_post: data_user.posts[0], posts: data_posts.posts }));
 									}
 								});
 							} else {
-								res.json().then(data => {
-									alert(data.error);
-								});
+								this.props.change_page("register");
 							}
 						}).catch();
 					}
                 });
             } else {
-				res.json().then(data => {
-					alert(data.error);
-				});
+				this.props.change_page("register")
 			}
 		}).catch();
     }
@@ -368,13 +368,13 @@ class MessagesPage extends React.Component {
 			if (res.ok) {
                 res.json()
 				.then((data) => {
-					if (data.messages[0])
+					if (data.messages[0]) {
+						this.props.save_last_msg_id(data.messages[data.messages.length - 1].m_id);
 						this.setState((_prev_state) => ({ loading: false, messages: data.messages }));
+					}
 				});
             } else {
-				res.json().then(data => {
-					alert(data.error);
-				});
+				this.props.change_page("register");
 			}
 		}).catch();
     }
@@ -434,7 +434,8 @@ class AdminPage extends React.Component {
 		return React.createElement("div", null,
 			React.createElement("div", { className: "posts-container" },
 			React.createElement(Broadcast),
-			React.createElement(UserStatus)),
+			React.createElement(UserStatus),
+			React.createElement(UsersList, { change_page: this.props.change_page.bind(this) })),
 			
 		);
 	}
