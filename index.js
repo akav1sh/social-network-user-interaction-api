@@ -440,7 +440,6 @@ async function get_user_post(req, res) {
             else
                 posts = await user_fs.get_posts()
 
-            console.log(posts)
             if (post_amount !== all)
                 posts = posts.slice(-post_amount)
 

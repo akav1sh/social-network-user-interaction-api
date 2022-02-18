@@ -117,7 +117,7 @@ button.primary:hover {
 }
 button.secondary {
   background: #41b3a3;
-  width: 20%;
+  width: 25%;
   height:20%;
   margin: 5px;
 }
@@ -209,6 +209,47 @@ button.secondary:hover {
   margin: 5px;
 }
 
+.user-text {
+  color: rgb(15 15 15 / 51%);
+  font-size: 16px;
+  font-weight: 400;
+  margin: 5px;
+}
+
+.time-text {
+  color: rgb(15 15 15 / 51%);
+  font-size: 16px;
+  font-weight: 700;
+  margin: 5px;
+  direction: rtl;
+  padding: 5px;
+}
+
+.status {
+  display:inline;
+  font-weight: 700;
+  color: tomato;
+}
+
+
+::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 5px;
+	background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar
+{
+	width: 9px;
+}
+
+::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #85dcb8;
+}
 
 .header {    
   padding: 10px 16px;
@@ -293,6 +334,16 @@ button.secondary:hover {
     cursor: pointer;
   }
 
+  .posts .notification {
+    background-image: url(./images/bell.png);
+    height: 20px;
+    width: 20px;
+    background-size: cover;
+    position: absolute;
+    top: -6px;
+    right: -7px;
+  }
+
   .icon-container > .logout {
     background-image: url(./images/logout.png);
     height: 40px;
@@ -312,6 +363,8 @@ button.secondary:hover {
     height: 40px;
     width: 40px;
     background-size: cover;
+    position: relative;
+    display: inline-block;
   }
 
   .icon-container > .messages {
@@ -319,6 +372,8 @@ button.secondary:hover {
     height: 40px;
     width: 40px;
     background-size: cover;
+    position: relative;
+    display: inline-block;
   }
 
   .icon-container > .admin {
@@ -327,12 +382,13 @@ button.secondary:hover {
     width: 40px;
     background-size: cover;
   }
-
+  
+  .admin-container,
   .about-container,
   .post-container {
-    height: 14%;
+    height: 15%;
     width: 100%;
-    padding: 15px;
+    padding: 10px;
     background: #56997d;
     display: flex;
     flex-direction: column;
@@ -356,6 +412,45 @@ button.secondary:hover {
 
   .about-container {
     height: 40%;
+    overflow: auto;
+  }
+
+  .admin-container {
+    height: 60%;
+  }
+
+  .user-container {
+    box-shadow: inset -2px -3px 12px 2px rgb(15 15 15 / 28%);
+    height: 75%;
+    width: 100%;
+    padding: 15px;
+    background: #f2f2f5;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: 'Roboto', sans-serif;
+    border-radius: 6px;
+    overflow: scroll;
+    overflow-x: hidden;
+  }
+
+  .text-container {
+    margin-top: 4px;
+    margin-bottom: -4px;
+    box-shadow: inset -2px -3px 12px 2px rgb(15 15 15 / 28%);
+    height: 50%;
+    max-height: 56px;
+    width: 100%;
+    padding: 1%;
+    background: #f2f2f5;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-family: 'Roboto', sans-serif;
+    border-radius: 6px;
+    overflow: scroll;
+    overflow-x: hidden;
+    overflow-wrap: break-word
   }
 
 
@@ -380,6 +475,16 @@ button.secondary:hover {
     
     .post-text {
       font-size: 1rem;
+      margin:0;
+    }
+
+    .post-text {
+      font-size: 1rem;
+      margin:0;
+    }
+
+    .user-text {
+      font-size: 0.7rem;
       margin:0;
     }
 
