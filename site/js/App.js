@@ -57,7 +57,8 @@ class App extends React.Component {
 											this.setState(prev_state => ({ prev_state, msg_bell: msg_bell, pst_bell: pst_bell }));
 									});
 								} else {
-									//TODO
+									if (post_res.statusText === "Forbidden")
+										this.change_page("register")
 								}
 							}).catch();
 						}
@@ -75,10 +76,35 @@ class App extends React.Component {
 							this.setState(prev_state => ({ prev_state, msg_bell: msg_bell, pst_bell: pst_bell }));
 					});
 				} else {
-					//TODO
+					if (post_res.statusText === "Forbidden")
+						this.change_page("register")
 				}
 			}).catch();
 		}
+	}
+
+	handle_logged_user() {
+		is_logged()
+		.then((res) => {
+			if (res.ok) {
+				res.json().then((data) => {
+					get_message(0, "all", 1)
+					.then((res) => {
+						if (res.ok) {
+							res.json()
+							.then((data) => {
+								if (data.messages[0]) 
+									this.save_last_msg_id(data.messages[0].m_id);
+								this.state.timerId = setInterval(this.notification, 2000);
+							});
+						}
+						this.get_posts(data.u_id, data.full_name);
+					}).catch();
+				});
+			} else {
+				this.change_page("register")
+			}
+		}).catch();
 	}
 
 	get_posts(id, name) {
@@ -121,30 +147,6 @@ class App extends React.Component {
 		}
     }
 
-	handle_logged_user() {
-		is_logged()
-		.then((res) => {
-			if (res.ok) {
-				res.json().then((data) => {
-					get_message(0, "all", 1)
-					.then((res) => {
-						if (res.ok) {
-							res.json()
-							.then((data) => {
-								if (data.messages[0]) 
-									this.save_last_msg_id(data.messages[0].m_id);
-								this.state.timerId = setInterval(this.notification, 5000);
-							});
-						}
-						this.get_posts(data.u_id, data.full_name);
-					}).catch();
-				});
-			} else {
-				this.change_page("register")
-			}
-		}).catch();
-	}
-
 	save_last_post_id(post_id) {
 		this.state.last_post_id = post_id;
 	}
@@ -154,7 +156,10 @@ class App extends React.Component {
 	}
 
 	change_page(new_page) {
-		this.setState((_prev_state) => ({ page: new_page}));
+		if (new_page === "messages")
+			this.setState((_prev_state) => ({ page: new_page, msg_bell: false }));
+		else
+			this.setState((_prev_state) => ({ page: new_page }));
 
 		if (new_page === "register") {
 			clearInterval(this.state.timerId)
@@ -163,7 +168,7 @@ class App extends React.Component {
 	}
   
 	handle_homepage(id, name, user_post, posts) {
-		this.setState(_prev_state => ({ page: "homepage", u_id: id, full_name: name, profile_pic: Math.floor(Math.random() * 4) + 1, user_post: user_post, posts: posts }));
+		this.setState(_prev_state => ({ page: "homepage", u_id: id, full_name: name, profile_pic: Math.floor(Math.random() * 4) + 1, user_post: user_post, posts: posts, pst_bell: false }));
 	}
 
 	change_state() {
@@ -224,7 +229,7 @@ class App extends React.Component {
 			}
 			
 			page_layout = React.createElement("div", null,
-				React.createElement(Header, { u_id: this.state.u_id, full_name: this.state.full_name,
+				React.createElement(Header, { u_id: this.state.u_id, full_name: this.state.full_name, 
 					 msg_bell: this.state.msg_bell, pst_bell: this.state.pst_bell, change_page: this.change_page.bind(this), get_posts: this.get_posts.bind(this) }),
 				React.createElement(Profile, { u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic }),
 				page_dislay);

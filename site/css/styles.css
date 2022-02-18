@@ -343,6 +343,7 @@ button.secondary:hover {
     position: absolute;
     top: -6px;
     right: -7px;
+    transition: background 0.3s;
   }
 
   .icon-container > .logout {

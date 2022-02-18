@@ -285,7 +285,6 @@ class Homepage extends React.Component {
 			React.createElement(Post, { post: "loading" }),
 			React.createElement(Post, { post: "loading" })));
 		} else {
-			console.log(posts)
 			if (this.props.posts) {
 				posts = this.props.posts.map((post, i) => {
 					if ((this.props.user_post && post.p_id !== this.props.user_post.p_id)

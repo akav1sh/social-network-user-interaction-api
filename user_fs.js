@@ -124,6 +124,7 @@ async function get_posts()
 {
     return await fs.readFile(db_file)
         .then(res => {
+            console.log(res)
             const db_json = JSON.parse(res.toString('utf-8'))
             let all_posts = []
             db_json.users.forEach(user => {
