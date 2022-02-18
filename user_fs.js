@@ -150,7 +150,12 @@ async function get_messages(requesting_user_id, sender_id, status)
             // filter sender id to get messages from single user or all if id === "0"
             let messages = requesting_user.messages
                 .filter(message => message.sender_id === (sender_id !== "0" ? sender_id : message.sender_id))
-                .filter(message => message.sender_id !== requesting_user_id)
+                .filter(message => {
+                    if (requesting_user_id === "1")
+                        return true
+                    else
+                        return message.sender_id !== requesting_user_id
+                })
             if (status !== "all")
                 messages = messages.filter(message => message.m_status === status)
                 messages.forEach(message => message.m_status = "read")
