@@ -215,12 +215,12 @@ class Header extends React.Component {
 		.then((res) => {
 			if (res.ok) {
 				alert("Successfully logged out");
-				this.props.change_page("register");
 			} else {
 				res.json().then(data => {
 					alert(data.error);
 				});
 			}
+			this.props.change_page("register");
 		}).catch();
 	}
 
@@ -292,25 +292,26 @@ class Homepage extends React.Component {
         .then((res_user) => {
 			if (res_user.ok) {
                 res_user.json().then((data_user) => {
-                    if (data_user.posts[0]) {
-						get_post(0, 4)
-						.then((res_posts) => {
-							if (res_posts.ok) {
-								res_posts.json().then((data_posts) => {
-									if (data_posts.posts[0]) {
-										this.props.save_last_post_id(data_posts.posts[data_posts.posts.length - 1].p_id);
-										this.setState((_prev_state) => ({ loading: false, user_post: data_user.posts[0], posts: data_posts.posts }));
-									} else {
-										//TODO
-									}
-								});
-							} else {
-								this.props.change_page("register");
-							}
-						}).catch();
-					} else {
-						//TODO
-					}
+					get_post(0, 4)
+					.then((res_posts) => {
+						if (res_posts.ok) {
+							res_posts.json().then((data_posts) => {
+								if (data_posts.posts[0] && data_user.posts[0]) {
+									this.props.save_last_post_id(data_posts.posts[data_posts.posts.length - 1].p_id);
+									this.setState((_prev_state) => ({ loading: false, user_post: data_user.posts[0], posts: data_posts.posts }));
+								} else if (data_posts.posts[0]) {
+									this.props.save_last_post_id(data_posts.posts[data_posts.posts.length - 1].p_id);
+									this.setState((_prev_state) => ({ loading: false, user_post: null, posts: data_posts.posts }));
+								} else if (data_user.posts[0]) {
+									this.setState((_prev_state) => ({ loading: false, user_post: data_user.posts[0], posts: null }));
+								} else {
+									this.setState((_prev_state) => ({ loading: false, user_post: null, posts: null }));
+								}
+							});
+						} else {
+							this.props.change_page("register");
+						}
+					}).catch();
                 });
             } else {
 				this.props.change_page("register")
@@ -332,7 +333,8 @@ class Homepage extends React.Component {
 		} else {
 			if (this.state.posts) {
 				posts = this.state.posts.map((post, i) => {
-					if (post.p_id !== this.state.user_post.p_id)
+					if ((this.state.user_post && post.p_id !== this.state.user_post.p_id)
+						|| !this.state.user_post)
 						return React.createElement(Post, { key: i, post: post }) 
 				  });
 			}
@@ -341,7 +343,8 @@ class Homepage extends React.Component {
 				React.createElement("div", { className: "posts-container", id: "posts-container" },
 				React.createElement(NewPost, { update_homepage: this.update_homepage.bind(this) }),
 				this.state.user_post ? React.createElement(Post, { post: this.state.user_post }) : null,
-				posts.reverse()));
+				posts ? posts.reverse() : 
+				React.createElement(Post)));
 		}
 
 		return page_layout;
@@ -376,7 +379,7 @@ class MessagesPage extends React.Component {
 						this.props.save_last_msg_id(data.messages[data.messages.length - 1].m_id);
 						this.setState((_prev_state) => ({ loading: false, messages: data.messages }));
 					} else {
-						//TODO
+						this.setState((_prev_state) => ({ loading: false, messages: null }));
 					}
 				});
             } else {
@@ -405,7 +408,8 @@ class MessagesPage extends React.Component {
 			page_layout = React.createElement("div", null,
 				React.createElement("div", { className: "posts-container", id: "message-container" },
 				React.createElement(NewMessage, { update_page: this.update_messagepage.bind(this) }),
-				messages.reverse()));
+				messages ? messages.reverse() : 
+				React.createElement(Message)));
 		}
 
 		return page_layout;
@@ -434,15 +438,42 @@ class AboutPage extends React.Component {
 class AdminPage extends React.Component {
 	constructor(props) {
 		super(props);
+		this.state = {
+			loading: true
+		}
+		this.get_users_list();
 	}
 
+	get_users_list() {
+        get_users()
+        .then((res) => {
+			if (res.ok) {
+                res.json()
+				.then((data) => {
+					if (data.users[0]) 
+						this.setState((_prev_state) => ({ loading: false, users: data.users, original_list: data.users }));
+				});
+            } else {
+                this.props.change_page("register");
+			}
+		}).catch();
+    }
+
 	render() {
-		return React.createElement("div", null,
+		let page_layout;
+		if (this.state.loading) {
+			page_layout = React.createElement("div", null,
+			React.createElement("div", { className: "posts-container", id: "posts-container" },
+			React.createElement(Post, { post: "loading" }),
+			React.createElement(Post, { post: "loading" }),
+			React.createElement(Post, { post: "loading" })));
+		} else {
+			page_layout = React.createElement("div", null,
 			React.createElement("div", { className: "posts-container" },
 			React.createElement(Broadcast),
-			React.createElement(UserStatus),
-			React.createElement(UsersList, { change_page: this.props.change_page.bind(this) })),
-			
-		);
+			React.createElement(UserStatus, { refresh_userlist: this.get_users_list.bind(this) }),
+			React.createElement(UsersList, { users: this.state.users, original_list: this.state.original_list })));
+		}
+		return page_layout;
 	}
 }

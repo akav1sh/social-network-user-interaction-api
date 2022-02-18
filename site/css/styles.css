@@ -334,7 +334,8 @@ button.secondary:hover {
     cursor: pointer;
   }
 
-  .posts .notification {
+  .posts .notification,
+  .messages .notification {
     background-image: url(./images/bell.png);
     height: 20px;
     width: 20px;

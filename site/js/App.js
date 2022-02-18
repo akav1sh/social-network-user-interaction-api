@@ -13,8 +13,6 @@ class App extends React.Component {
 	componentDidMount() {
 		if (this.state.page === "login")
 			this.rightSide.classList.add("right");
-
-		this.state.timerId = setInterval(this.notification, 1000);
 	}
 
 	notification() {
@@ -25,11 +23,8 @@ class App extends React.Component {
 				if (post_res.ok) {
 					post_res.json()
 					.then((post_data) => {
-						console.log("last msg id:")
-						console.log(this.state.last_msg_id)
 						if (this.state.last_msg_id) {
-							// console.log("lst mssg id:" + this.state.last_msg_id)
-							get_message(0, "unread", 1)
+							get_message(0, "all", 1)
 							.then((msg_res) => {
 								if (msg_res.ok) {
 									msg_res.json()
@@ -40,14 +35,13 @@ class App extends React.Component {
 											&& this.state.last_msg_id !== msg_data.messages[0].m_id) 
 											this.setState(prev_state => ({ prev_state, msg_bell: true, pst_bell: true }))
 										else if (msg_data.messages[0] 
-												 && this.state.msg_id !== msg_data.messages[0].m_id)
+												 && this.state.last_msg_id !== msg_data.messages[0].m_id)
 											this.setState(prev_state => ({ prev_state, msg_bell: true, pst_bell: false }));
 										else if (post_data.posts[0] 
 												 && this.state.last_post_id !== post_data.posts[0].p_id)
 											this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: true }));
 										else
 											this.setState(prev_state => ({ prev_state, msg_bell: false, pst_bell: false }));
-										// console.log(this.state)
 									});
 								} else {
 									//TODO
@@ -78,6 +72,17 @@ class App extends React.Component {
 		.then((res) => {
 			if (res.ok) {
 				res.json().then((data) => {
+					get_message(0, "all", 1)
+					.then((res) => {
+						if (res.ok) {
+							res.json()
+							.then((data) => {
+								if (data.messages[0]) 
+									this.save_last_msg_id(data.messages[0].m_id);
+								this.state.timerId = setInterval(this.notification, 1000);
+							});
+						}
+					}).catch();
 					this.handle_homepage(data.u_id, data.full_name);
 				});
 			} else {
@@ -98,11 +103,13 @@ class App extends React.Component {
 		this.setState((_prev_state) => ({ page: new_page}));
 
 		if (new_page === "register") {
+			clearInterval(this.state.timerId)
 			this.change_state();
 		}
 	}
   
 	handle_homepage(id, name) {
+
 		this.setState(_prev_state => ({ page: "homepage", u_id: id, full_name: name, profile_pic: Math.floor(Math.random() * 4) + 1}));
 	}
 

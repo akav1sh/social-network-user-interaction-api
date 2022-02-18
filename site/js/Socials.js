@@ -61,14 +61,17 @@ class Post extends React.Component {
 
     render() {
         let layout;
-        const timestamp = new Date(this.props.post.time);
         if (this.props.post === "loading") {
             layout = React.createElement("img", { src: "css/images/animation.gif", alt: "Italian Trulli" });
-        } else {
+        } else if (this.props.post) {
+            const timestamp = new Date(this.props.post.time);
             layout = React.createElement("div", { className: "post-container" },
             React.createElement("div", { className: "post-text" }, "A post from " + this.props.post.full_name + ":",
             React.createElement("div", { className: "text-container" }, this.props.post.text),
             React.createElement("div", { className: "time-text" }, "Time: " + timestamp.toLocaleString('he-IL') + "\u2003Post ID: " + this.props.post.p_id)));
+        } else {
+            layout = React.createElement("div", { className: "post-container" },
+            React.createElement("div", { className: "post-text" }, "No posts yet, be the first!"));
         }
         
         return layout;
@@ -199,14 +202,15 @@ class Message extends React.Component {
 
     render() {
         let layout;
-        const timestamp = new Date(this.props.message.time);
-        if (this.props.post === "loading") {
-            layout = React.createElement("img", { src: "css/images/animation.gif", alt: "Italian Trulli" });
-        } else {
+        if (this.props.message) {
+            const timestamp = new Date(this.props.message.time);
             layout = React.createElement("div", { className: "post-container" },
             React.createElement("div", { className: "post-text" }, "A message from user id " + this.props.message.sender_id + ":",
             React.createElement("div", { className: "text-container" }, this.props.message.text),
             React.createElement("div", { className: "time-text" }, "Time: " + timestamp.toLocaleString('he-IL') + "\u2003Message ID: " + this.props.message.m_id)));
+        } else {
+            layout = React.createElement("div", { className: "post-container" },
+            React.createElement("div", { className: "post-text" }, "You don't have any messages yet!"));
         }
         return layout
     }
@@ -223,6 +227,7 @@ class UserStatus extends React.Component {
 		.then((res) => {
 			if (res.ok) {
 				alert("Status successfully updated");
+                this.props.refresh_userlist();
 			} else {
 				res.json().then(data => {
 					alert(data.error);
@@ -301,126 +306,104 @@ class User extends React.Component {
 class UsersList extends React.Component {
     constructor(props) {
 		super(props);
-        this.state = {
-            loading: true
-        }
-        this.get_users_list()
 	}
-
-    get_users_list() {
-        get_users()
-        .then((res) => {
-			if (res.ok) {
-                res.json()
-				.then((data) => {
-					if (data.users[0]) 
-						this.setState((_prev_state) => ({ loading: false, users: data.users, original_list: data.users }));
-				});
-            } else {
-                this.props.change_page("register");
-			}
-		}).catch();
-    }
 
     handle_users = e => {
 		e.preventDefault(e.target.id.value);
 		let new_users_list;
-        if (this.state.users) {
+        if (this.props.users) {
             switch(e.nativeEvent.submitter.name) {
                 case 'search':
-                    new_users_list = this.state.original_list.filter(user => user.u_id === e.target.id.value);
+                    new_users_list = this.props.original_list.filter(user => user.u_id === e.target.id.value);
                     break;
                 case 'created':
-                    new_users_list = this.state.original_list.filter(user => user.u_status === 'created');
+                    new_users_list = this.props.original_list.filter(user => user.u_status === 'created');
                     break;
                 case 'active':
-                    new_users_list = this.state.original_list.filter(user => user.u_status === 'active');
+                    new_users_list = this.props.original_list.filter(user => user.u_status === 'active');
                     break;
                 case 'suspended':
-                    new_users_list = this.state.original_list.filter(user => user.u_status === 'suspended');
+                    new_users_list = this.props.original_list.filter(user => user.u_status === 'suspended');
                     break;
                 case 'deleted':
-                    new_users_list = this.state.original_list.filter(user => user.u_status === 'deleted');
+                    new_users_list = this.props.original_list.filter(user => user.u_status === 'deleted');
                     break;
                 case 'all':
-                    new_users_list = this.state.original_list;
+                    new_users_list = this.props.original_list;
                     break;
             }
         }
         e.target.id.value = "";
-        this.setState((prev_state) => ({ loading: false, users: new_users_list, original_list: prev_state.original_list }));
+        this.props.users = new_users_list;
 	}
 
     render() {
         let layout, users;
-        if (this.state.loading) {
-            layout = React.createElement("img", { src: "css/images/animation.gif", alt: "Italian Trulli" });
-        } else {
-            if (this.state.users) {
-				users = this.state.users.map((user, i) => {
-					return React.createElement(User, { key: i, user: user }) 
-				  });
-			}
+        
+        if (this.props.users) {
+            users = this.props.users.map((user, i) => {
+                return React.createElement(User, { key: i, user: user }) 
+                });
+        }
 
-            layout = React.createElement(
+        layout = React.createElement(
+            "div",
+            { className: "post-container admin-container", id: "write-post" },
+            React.createElement(
+                "form",
+                { className: "form", onSubmit: this.handle_users },
+            React.createElement(
                 "div",
-                { className: "post-container admin-container", id: "write-post" },
-                React.createElement(
-                    "form",
-                    { className: "form", onSubmit: this.handle_users },
-                React.createElement(
-                    "div",
-                    { className: "post-text" },
-                    "Users List:"
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "flex-box" },
-                        React.createElement(
-                            "div",
-                            { className: "input-group" },
-                            React.createElement("input",
-                            { className: "post-input", type: "text", name: "id", placeholder: "User ID" })
-                        ),
-                        React.createElement(
-                            "button",
-                            { className: "secondary", name: "search"},
-                            "Search"
-                        ),
-                        React.createElement(
-                            "button",
-                            { className: "secondary", name: "created" },
-                            "Created"
-                        ),
-                        React.createElement(
-                            "button",
-                            { className: "secondary", name: "active" },
-                            "Active"
-                        ),
-                        React.createElement(
-                            "button",
-                            { className: "secondary", name: "suspended" },
-                            "Suspended"
-                        ),
-                        React.createElement(
-                            "button",
-                            { className: "secondary", name: "deleted" },
-                            "Deleted"
-                        ),
-                        React.createElement(
-                            "button",
-                            { className: "secondary", name: "all" },
-                            "All"
-                        ),	
-                    ),
+                { className: "post-text" },
+                "Users List:"
                 ),
                 React.createElement(
                     "div",
-                    { className: "user-container" },
-                    users)
-            );
-        }
-
+                    { className: "flex-box" },
+                    React.createElement(
+                        "div",
+                        { className: "input-group" },
+                        React.createElement("input",
+                        { className: "post-input", type: "text", name: "id", placeholder: "User ID" })
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary", name: "search"},
+                        "Search"
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary", name: "created" },
+                        "Created"
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary", name: "active" },
+                        "Active"
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary", name: "suspended" },
+                        "Suspended"
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary", name: "deleted" },
+                        "Deleted"
+                    ),
+                    React.createElement(
+                        "button",
+                        { className: "secondary", name: "all" },
+                        "All"
+                    ),	
+                ),
+            ),
+            React.createElement(
+                "div",
+                { className: "user-container" },
+                users)
+        );
+    
         return layout;
     }
 }
