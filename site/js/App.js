@@ -144,13 +144,13 @@ class App extends React.Component {
 									this.handle_homepage(id, name, user_post, posts)
 								});
 							} else {
-								if (post_res.statusText === "Forbidden")
+								if (res_posts.statusText === "Forbidden")
 									this.change_page("register")
 							}
 						}).catch();
 					});
 				} else {
-					if (post_res.statusText === "Forbidden")
+					if (res_user.statusText === "Forbidden")
 						this.change_page("register")
 					}
 			}).catch();
