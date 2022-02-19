@@ -9,12 +9,13 @@ class App extends React.Component {
 		  last_msg_id: null
 		};
 		this.notification = this.notification.bind(this);
-		this.handle_logged_user();
 	}
   
 	componentDidMount() {
 		if (this.state.page === "login")
-			this.rightSide.classList.add("right");			
+			this.rightSide.classList.add("right");	
+		
+		this.handle_logged_user();
 	}
 
 	notification() {
@@ -88,18 +89,24 @@ class App extends React.Component {
 		.then((res) => {
 			if (res.ok) {
 				res.json().then((data) => {
-					get_message(0, "all", 1)
-					.then((res) => {
-						if (res.ok) {
-							res.json()
-							.then((data) => {
-								if (data.messages[0]) 
-									this.save_last_msg_id(data.messages[0].m_id);
-								this.state.timerId = setInterval(this.notification, 2000);
-							});
-						}
-						this.get_posts(data.u_id, data.full_name);
-					}).catch();
+					this.state.timerId = setInterval(this.notification, 5000);
+					this.get_message_to_save();
+					this.get_posts(data.u_id, data.full_name);
+				});
+			} else {
+				this.change_page("register")
+			}
+		}).catch();
+	}
+
+	get_message_to_save() {
+		get_message(0, "all", 1)
+		.then((res) => {
+			if (res.ok) {
+				res.json()
+				.then((data) => {
+					if (data.messages[0]) 
+						this.save_last_msg_id(data.messages[0].m_id);
 				});
 			} else {
 				this.change_page("register")
@@ -193,7 +200,9 @@ class App extends React.Component {
 		const current = page === "login" ? "Register" : "Login";
 	  	let page_layout, page_dislay;
 
-		if (page === "login" || page === "register") {
+		if (page === "loading"){
+			page_layout = React.createElement("img", { src: "./css/images/loading.gif" })
+		} else if (page === "login" || page === "register") {
 			page_layout =  React.createElement(
 				"div",
 				{ className: "App" },
@@ -224,10 +233,7 @@ class App extends React.Component {
 			} else if (page === "admin"){
 				page_dislay = React.createElement(AdminPage, { change_page: this.change_page.bind(this),
 					 u_id: this.state.u_id, full_name: this.state.full_name, profile_pic: this.state.profile_pic });
-			} else if (page === "loading"){
-				page_dislay = React.createElement("img", { src: "./css/images/loading.gif" })
 			}
-			
 			page_layout = React.createElement("div", null,
 				React.createElement(Header, { u_id: this.state.u_id, full_name: this.state.full_name, 
 					 msg_bell: this.state.msg_bell, pst_bell: this.state.pst_bell, change_page: this.change_page.bind(this), get_posts: this.get_posts.bind(this) }),
