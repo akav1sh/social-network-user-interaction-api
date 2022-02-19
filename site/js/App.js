@@ -85,11 +85,12 @@ class App extends React.Component {
 	}
 
 	handle_logged_user() {
+		const seconds = 30;
 		is_logged()
 		.then((res) => {
 			if (res.ok) {
 				res.json().then((data) => {
-					this.state.timerId = setInterval(this.notification, 5000);
+					this.state.timerId = setInterval(this.notification, seconds * 1000);
 					this.get_message_to_save();
 					this.get_posts(data.u_id, data.full_name);
 				});
@@ -121,7 +122,7 @@ class App extends React.Component {
 			.then((res_user) => {
 				if (res_user.ok) {
 					res_user.json().then((data_user) => {
-						get_post(0, 3)
+						get_post(0, 4)
 						.then((res_posts) => {
 							if (res_posts.ok) {
 								res_posts.json().then((data_posts) => {
@@ -156,6 +157,25 @@ class App extends React.Component {
 		}
     }
 
+	get_messages() {
+		let messages = null;
+        get_message(0, "all", 4)
+        .then((res) => {
+			if (res.ok) {
+                res.json()
+				.then((data) => {
+					if (data.messages[0]) {
+						this.save_last_msg_id(data.messages[data.messages.length - 1].m_id);
+						messages = data.messages;
+					}
+					this.setState((_prev_state) => ({ page: "messages", messages: messages, msg_bell: false }));
+				});
+            } else {
+				this.change_page("register");
+			}
+		}).catch();
+    }
+
 	save_last_post_id(post_id) {
 		this.state.last_post_id = post_id;
 	}
@@ -165,8 +185,8 @@ class App extends React.Component {
 	}
 
 	change_page(new_page) {
-		if (new_page === "messages")
-			this.setState((_prev_state) => ({ page: new_page, msg_bell: false }));
+		if (new_page === "messages") 
+			this.get_messages()
 		else
 			this.setState((_prev_state) => ({ page: new_page }));
 
@@ -229,7 +249,8 @@ class App extends React.Component {
 				page_dislay = React.createElement(Homepage, { get_posts: this.get_posts.bind(this), 
 					u_id: this.state.u_id, full_name: this.state.full_name, user_post: this.state.user_post, posts: this.state.posts });
 			} else if (page === "messages"){
-				page_dislay = React.createElement(MessagesPage, { change_page: this.change_page.bind(this), save_last_msg_id: this.save_last_msg_id.bind(this) });
+				page_dislay = React.createElement(MessagesPage, { change_page: this.change_page.bind(this),
+					save_last_msg_id: this.save_last_msg_id.bind(this), messages: this.state.messages });
 			} else if (page === "about"){
 				page_dislay = React.createElement(AboutPage);
 			} else if (page === "admin"){

@@ -1,5 +1,5 @@
-• Date: 05/01/2022
-• Name of the exercise: Exercise 2 in JS Course
+• Date: 19/02/2022
+• Name of the exercise: Exercise 3 in JS Course - ReactJS
 
 Details about submitters:
 • Full Name: Ronel David Gekhman
@@ -12,24 +12,29 @@ Details about submitters:
 
 Github: https://github.com/akav1sh/social-network-user-interaction-api
 
-Notes:
 
 API settings instructions:
 1. cd to package.json directory
 2. run "npm install"
 3. run: "node index.js"
+4. open browser on url: localhost:2718/
+5. login with admin credentials or register a new user.
 
-Postman test collection instructions:
-1. Import "js-ex2.postman_collection.json" in postman workspace.
-2. Press on js-ex collection.
-3. Press on the "Run" button.
-4. Optional - check box "Save responses".
-5. Press on Run js-ex.
+Admin credentislas:
+Email: root@mta.ac.il
+Password: Badgroot123
 
-External modules used:
-1. Express - module we saw in class for building APIs.
-2. http-status-codes - module for making http status codes more readable.
-3. dotenv - module for configuring environment variables, our use was for holding the SECRET key of our jwt encryption/decryption not in a variable and not in the DB, and if we expand to several servers they all can use the same key from the environment.
-4. node-schedule - module for timed and periodic scheduling of jobs, we used it for removing the expired tokens from the DB every 10 mins as requested.
-5. jsonwebtoken - module for creating, verifying and handling tokens for authentication, we found this module after looking for modern and popular tokens to use with express and it was one of the best options, then after a research we used this module for creating our token with id information which is pretty safe to pass, using a SECRET key that was only available in the server environment and used the feature of setting expiration data to 10 mins, then we used it to verify it with the same SECRET. Other than that we placed our active keys in the DB not related to any user and handled their deletion after 10 mins so the DB don't grow with expired tokens garbage. Our token validation firstly looking for it in the DB and then verifying it with the module feature. 
+
+Important notes:
+1. Broadcast appears for ALL users, including Admin user himself (meaning admin sees his own message).
+2. Refreshing on any page returns to the homepage (posts page), this is intended behaviour.
+3. Random user icon generated upon refresh, pressing the website's icon (rubiks cube), creating new posr or reenter posts page.
+4. Refreshing the page entirely refreshes the indicators (meaning removing them even if user did not go watch them),
+   we have a solution idea for this but didn't implement it because of time shortage, the idea is to store the information
+   in the local storage.
+5. In admin page, for better mobile view, removed the filter buttons.
+6. When sending broadcase/message/post there is no response for user to know he succeeded in send (we didn't want to do
+   this with alert tool), this is not very UX correct. There is however an indicator message for when the action did NOT 
+   succeed. Implementing a pop-up or a timed message is a good idea to answer this for UX part if we had a bit more time.
+7. We show N = 3 posts and messages.
 

@@ -4,7 +4,7 @@ class NewPost extends React.Component {
 	}
 
     handle_post = e => {
-		e.preventDefault();
+		e.preventDefault(e.target.post.value);
 
         if (!e.target.post.value)
             alert("Can't post an empty post")
@@ -12,7 +12,6 @@ class NewPost extends React.Component {
             create_post(e.target.post.value)
             .then((res) => {
                 if (res.ok) {
-                    alert("Post successfull");
                     this.props.get_posts(this.props.u_id, this.props.full_name);
                 } else {
                     res.json().then(data => {
@@ -94,7 +93,8 @@ class NewMessage extends React.Component {
 
     handle_message = e => {
 		e.preventDefault(e.target.id.value);
-
+        e.preventDefault(e.target.message.value);
+        
         if (!e.target.message.value)
             alert("Can't send empty message")
         else if (!e.target.id.value)
@@ -103,8 +103,7 @@ class NewMessage extends React.Component {
             send_message(e.target.id.value, e.target.message.value)
             .then((res) => {
                 if (res.ok) {
-                    alert("Message successfull");
-                    this.props.update_page();
+                    this.props.update_page("messages");
                 } else {
                     res.json().then(data => {
                         alert(data.error);
@@ -161,15 +160,14 @@ class Broadcast extends React.Component {
 	}
 
     handle_message = e => {
-		e.preventDefault(e.target.id.value);
+		e.preventDefault(e.target.broadcast.value);
         
-        if (!e.target.id.value)
+        if (!e.target.broadcast.value)
             alert("Can't send empty broadcast")
         else {
             broadcast_message(e.target.broadcast.value)
             .then((res) => {
                 if (res.ok) {
-                    alert("Broadcast successfull");
                 } else {
                     res.json().then(data => {
                         alert(data.error);
@@ -237,14 +235,57 @@ class UserStatus extends React.Component {
     constructor(props) {
 		super(props);
 	}
+}
+
+class User extends React.Component {
+    constructor(props) {
+		super(props);
+	}
+
+    render() {
+        return React.createElement("div", { className: "post-text" },
+        React.createElement("u", null, "User " + this.props.user.u_id +":"),
+            React.createElement("div", { className: "user-text" },
+                React.createElement("br", null),
+                React.createElement("b", null, "\u2003Full name: "),
+                this.props.user.full_name,
+                React.createElement("br", null),
+                React.createElement("b", null, "\u2003Email: "),
+                this.props.user.email,
+                React.createElement("br", null),
+                React.createElement("b", null, "\u2003Status: "),
+                React.createElement("div", { className: "status" }, this.props.user.u_status),
+                React.createElement("br", null),
+                React.createElement("br", null)));
+    }
+}
+
+class UsersList extends React.Component {
+    constructor(props) {
+		super(props);
+        this.state = {
+            original_list: this.props.original_list,
+            users: this.props.original_list
+        }
+	}
 
     handle_status = e => {
         e.preventDefault(e.target);
 		update_user_status(e.target.id.value, e.nativeEvent.submitter.name)
 		.then((res) => {
 			if (res.ok) {
-				alert("Status successfully updated");
-                this.props.refresh_userlist();
+                get_users()
+                .then((res) => {
+                    if (res.ok) {
+                        res.json()
+                        .then((data) => {
+                            if (data.users[0]) 
+                                this.setState((_prev_state) => ({ original_list: data.users, users: data.users }));
+                        });
+                    } else {
+                        this.props.change_page("register");
+                    }
+                }).catch();
 			} else {
 				res.json().then(data => {
 					alert(data.error);
@@ -255,8 +296,45 @@ class UserStatus extends React.Component {
 
 	}
 
+    handle_users = e => {
+		e.preventDefault(e.target.id.value);
+		let new_users_list;
+        if (this.state.original_list) {
+            switch(e.nativeEvent.submitter.name) {
+                case 'search':
+                    new_users_list = this.state.original_list.filter(user => user.u_id === e.target.id.value);
+                    break;
+                case 'created':
+                    new_users_list = this.state.original_list.filter(user => user.u_status === 'created');
+                    break;
+                case 'active':
+                    new_users_list = this.state.original_list.filter(user => user.u_status === 'active');
+                    break;
+                case 'suspended':
+                    new_users_list = this.state.original_list.filter(user => user.u_status === 'suspended');
+                    break;
+                case 'deleted':
+                    new_users_list = this.state.original_list.filter(user => user.u_status === 'deleted');
+                    break;
+                case 'all':
+                    new_users_list = this.state.original_list;
+                    break;
+            }
+        }
+        e.target.id.value = "";
+        this.setState((_prev_state) => ({ users: new_users_list }));
+	}
+
     render() {
-        return React.createElement(
+        let user_status, layout, users;
+        
+        if (this.state.users) {
+            users = this.state.users.map((user, i) => {
+                return React.createElement(User, { key: i, user: user }) 
+            });
+        }
+
+        user_status = React.createElement(
             "div",
             { className: "post-container", id: "write-post" },
             React.createElement(
@@ -294,77 +372,6 @@ class UserStatus extends React.Component {
                 ),
               ),
         );
-    }
-}
-
-class User extends React.Component {
-    constructor(props) {
-		super(props);
-	}
-
-    render() {
-        return React.createElement("div", { className: "post-text" },
-        React.createElement("u", null, "User " + this.props.user.u_id +":"),
-            React.createElement("div", { className: "user-text" },
-                React.createElement("br", null),
-                React.createElement("b", null, "\u2003Full name: "),
-                this.props.user.full_name,
-                React.createElement("br", null),
-                React.createElement("b", null, "\u2003Email: "),
-                this.props.user.email,
-                React.createElement("br", null),
-                React.createElement("b", null, "\u2003Status: "),
-                React.createElement("div", { className: "status" }, this.props.user.u_status),
-                React.createElement("br", null),
-                React.createElement("br", null)));
-    }
-}
-
-class UsersList extends React.Component {
-    constructor(props) {
-		super(props);
-        this.state = {
-            users: this.props.original_list
-        }
-	}
-
-    handle_users = e => {
-		e.preventDefault(e.target.id.value);
-		let new_users_list;
-        if (this.props.original_list) {
-            switch(e.nativeEvent.submitter.name) {
-                case 'search':
-                    new_users_list = this.props.original_list.filter(user => user.u_id === e.target.id.value);
-                    break;
-                case 'created':
-                    new_users_list = this.props.original_list.filter(user => user.u_status === 'created');
-                    break;
-                case 'active':
-                    new_users_list = this.props.original_list.filter(user => user.u_status === 'active');
-                    break;
-                case 'suspended':
-                    new_users_list = this.props.original_list.filter(user => user.u_status === 'suspended');
-                    break;
-                case 'deleted':
-                    new_users_list = this.props.original_list.filter(user => user.u_status === 'deleted');
-                    break;
-                case 'all':
-                    new_users_list = this.props.original_list;
-                    break;
-            }
-        }
-        e.target.id.value = "";
-        this.setState((_prev_state) => ({ users: new_users_list }));
-	}
-
-    render() {
-        let layout, users;
-        
-        if (this.state.users) {
-            users = this.state.users.map((user, i) => {
-                return React.createElement(User, { key: i, user: user }) 
-                });
-        }
         
         if (window.innerWidth <= 760) {
             layout = React.createElement(
@@ -459,7 +466,7 @@ class UsersList extends React.Component {
             );
         }
     
-        return layout;
+        return React.createElement("div", { className: "flex-box-column" }, user_status, layout);
     }
 }
 

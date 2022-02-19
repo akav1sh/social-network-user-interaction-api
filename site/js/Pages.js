@@ -16,7 +16,6 @@ class Login extends React.Component {
 			login(e.target.email.value, e.target.password.value)
 			.then((res) => {
 				if (res.ok) {
-					alert("Successfully logged in");
 					res.json().then((data) => {
 						this.props.handle_logged_user();
 					});
@@ -103,7 +102,6 @@ class Register extends React.Component {
 			register(e.target.full_name.value, e.target.email.value, e.target.password.value)
 			.then((res) => {
 				if (res.ok) {
-					alert("Successfully registered");
 					this.props.change_state();
 				} else {
 					res.json().then(data => {
@@ -214,7 +212,6 @@ class Header extends React.Component {
 		logout()
 		.then((res) => {
 			if (res.ok) {
-				alert("Successfully logged out");
 			} else {
 				res.json().then(data => {
 					alert(data.error);
@@ -328,43 +325,11 @@ class Homepage extends React.Component {
 class MessagesPage extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			loading: true,
-			messages: null
-		};
-
 	}
-
-	componentDidMount() {
-		this.get_messages()
-	}
-
-	update_messagepage() {
-		this.get_messages()
-	}
-
-	get_messages() {
-        get_message(0, "all", 4)
-        .then((res) => {
-			if (res.ok) {
-                res.json()
-				.then((data) => {
-					if (data.messages[0]) {
-						this.props.save_last_msg_id(data.messages[data.messages.length - 1].m_id);
-						this.setState((_prev_state) => ({ loading: false, messages: data.messages }));
-					} else {
-						this.setState((_prev_state) => ({ loading: false, messages: null }));
-					}
-				});
-            } else {
-				this.props.change_page("register");
-			}
-		}).catch();
-    }
 
 	render() {
 		let page_layout, messages = null;
-		if (this.state.loading) {
+		if (this.props.loading) {
 			page_layout = React.createElement("div", null,
 			React.createElement("div", { className: "posts-container", id: "posts-container" },
 			React.createElement(Post, { post: "loading" }),
@@ -373,15 +338,15 @@ class MessagesPage extends React.Component {
 			React.createElement(Post, { post: "loading" }),
 			React.createElement(Post, { post: "loading" })));
 		} else {
-			if (this.state.messages) {
-				messages = this.state.messages.map((message, i) => {
+			if (this.props.messages) {
+				messages = this.props.messages.map((message, i) => {
 					return React.createElement(Message, { key: i, message: message }) 
 				  });
 			}
 
 			page_layout = React.createElement("div", null,
 				React.createElement("div", { className: "posts-container", id: "message-container" },
-				React.createElement(NewMessage, { update_page: this.update_messagepage.bind(this) }),
+				React.createElement(NewMessage, { update_page: this.props.change_page.bind(this) }),
 				messages ? messages.reverse() : 
 				React.createElement(Message)));
 		}
@@ -401,8 +366,20 @@ class AboutPage extends React.Component {
 			React.createElement("div", { className: "post-text" }, "About us:",
 			React.createElement("br", null),
 				React.createElement("br", null),
-					"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed tristique quam, et molestie augue. Sed dictum massa interdum, cursus lacus a, mattis ex. Sed laoreet bibendum diam, a malesuada dui auctor et. Aliquam erat volutpat. Nullam ut lectus euismod, viverra enim ac, pretium eros. Proin ultrices massa ac urna condimentum euismod. Morbi sit amet viverra nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Phasellus faucibus nisi condimentum urna vehicula rhoncus. Nunc pharetra mi condimentum nunc semper tincidunt. Curabitur aliquam vel ligula vel ullamcorper.",
-					"Mauris sed est at augue accumsan dignissim. Donec malesuada pulvinar dolor, a vulputate orci malesuada nec. Integer sit amet dolor dapibus, hendrerit neque at, efficitur dui. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur ligula nisl, facilisis eu egestas vel, placerat at nisi. Aliquam sit amet justo eget ipsum dictum iaculis. Vivamus vehicula est eget velit aliquet, vel congue mi porttitor. Fusce vehicula enim in mollis aliquam. Donec imperdiet cursus erat, quis sagittis massa ullamcorper in. Proin mattis, elit nec faucibus porta, nisl massa molestie erat, sed interdum orci quam ut nisi. Duis maximus leo ut nisl consequat faucibus. Vestibulum interdum scelerisque est a scelerisque. Sed non libero quis nulla bibendum pellentesque."
+				"This project was created for the course \"JavaScript on server and browser\"",
+				React.createElement("br", null),
+				React.createElement("br", null),
+				"Created by:",
+				React.createElement("br", null),
+				React.createElement("br", null),
+				"\u2003Ronel David Gekhman - 313564510",
+				React.createElement("br", null),
+				"\u2003roneldavidge@mta.ac.il",
+				React.createElement("br", null),
+				React.createElement("br", null),
+				"\u2003Karina Batmanishvili - 321800898",
+				React.createElement("br", null),
+				"\u2003karinaba@mta.ac.il"
 				),
 			),
 		);
@@ -415,6 +392,9 @@ class AdminPage extends React.Component {
 		this.state = {
 			loading: true
 		}
+	}
+
+	componentDidMount() {
 		this.get_users_list();
 	}
 
@@ -446,7 +426,6 @@ class AdminPage extends React.Component {
 			page_layout = React.createElement("div", null,
 			React.createElement("div", { className: "posts-container" },
 			React.createElement(Broadcast),
-			React.createElement(UserStatus, { refresh_userlist: this.get_users_list.bind(this) }),
 			React.createElement(UsersList, { original_list: this.state.original_list })));
 		}
 		return page_layout;
