@@ -21,8 +21,8 @@ background: #85dcb8;
 
 html,
 body {
-overflow: hidden;
-height: 100%;
+  overflow: auto;
+  height: 100%;
 }
 
 #root {
@@ -338,6 +338,30 @@ button.secondary:hover {
     cursor: pointer;
   }
 
+  .tooltiptext {
+    visibility: hidden;
+    width: 63px;
+    background-color: #56997da3;
+    color: #325345;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    font-size: 0.8rem;
+    font-weight: 700;
+    top: -17px;
+    left: -12px;
+  }
+  
+  .admin:hover .tooltiptext,
+  .posts:hover .tooltiptext,
+  .messages:hover .tooltiptext,
+  .about:hover .tooltiptext,
+  .logout:hover .tooltiptext {
+    visibility: visible;
+  }
+
   .posts .notification,
   .messages .notification {
     background-image: url(./images/bell.png);
@@ -357,9 +381,6 @@ button.secondary:hover {
     background-size: cover;
     transition: filter 0.8s;
   }
-  .logout:hover {
-    filter: opacity(1);
-  }
 
   .icon-container > .about {
     filter: opacity(0.6);
@@ -368,9 +389,6 @@ button.secondary:hover {
     width: 40px;
     background-size: cover;
     transition: filter 0.8s;
-  }
-  .about:hover {
-    filter: opacity(1);
   }
 
   .icon-container > .posts {
@@ -383,9 +401,6 @@ button.secondary:hover {
     display: inline-block;
     transition: filter 0.8s;
   }
-  .posts:hover {
-    filter: opacity(1);
-  }
 
   .icon-container > .messages {
     filter: opacity(0.6);
@@ -397,9 +412,6 @@ button.secondary:hover {
     display: inline-block;
     transition: filter 0.8s;
   }
-  .messages:hover {
-    filter: opacity(1);
-  }
 
   .icon-container > .admin {
     filter: opacity(0.6);
@@ -409,13 +421,19 @@ button.secondary:hover {
     background-size: cover;
     transition: filter 0.8s;
   }
+   
+  .logout:hover,
+  .about:hover,
+  .messages:hover,
+  .posts:hover,
   .admin:hover {
     filter: opacity(1);
-  }  
+  } 
+
   .admin-container,
   .about-container,
   .post-container {
-    height: 15%;
+    height: 125px;
     width: 100%;
     padding: 10px;
     background: #56997d;
@@ -470,7 +488,7 @@ button.secondary:hover {
     height: 50%;
     max-height: 56px;
     width: 100%;
-    padding: 1%;
+    padding: 10px;
     background: #f2f2f5;
     display: flex;
     flex-direction: column;
@@ -507,20 +525,33 @@ button.secondary:hover {
       margin:0;
     }
 
-    .post-text {
-      font-size: 1rem;
-      margin:0;
+    .header-icon {
+      margin-left: 0;
     }
 
+    .input-group > input {
+      font-size: 1rem;
+    }
+    .input-group > input::placeholder {
+      font-size: 1rem;
+    }
     .user-text {
       font-size: 0.7rem;
       margin:0;
     }
 
     .homepage-text {
-      font-size: 1rem;
+      font-size: 0.8rem;
       margin-right: 0.5em;
       margin-left: 0.5em;
+    }
+
+    .time-text {
+      font-size: 0.8rem;
+    }
+
+    .text-container {
+      height: 42%;
     }
 
     .text {
@@ -531,12 +562,37 @@ button.secondary:hover {
     }
 
     .about-container, .post-container {
-      height: 12%;
+      height: 115px;
     }
 
-    .button {
-      font-size: 1rem;
+    .about-container,
+    .admin-container {
+      height: 55%
     }
+
+    .icon-container {
+      column-gap: 1rem;
+    }
+
+    button {
+      font-size: 0.8rem;
+    }
+    
+    .admin:hover,
+    .posts:hover,
+    .messages:hover,
+    .about:hover,
+    .logout:hover {
+      filter: opacity(0.6);
+    }
+
+    .admin:hover .tooltiptext,
+    .posts:hover .tooltiptext,
+    .messages:hover .tooltiptext,
+    .about:hover .tooltiptext,
+    .logout:hover .tooltiptext {
+      visibility: hidden;
+  }
 
     .profile-pic1, 
     .profile-pic2,
@@ -549,5 +605,36 @@ button.secondary:hover {
 
     .header {  
       padding: 10px 16px;
+    }
+  }
+
+  @media only screen and (max-width: 340px) { 
+    .header-icon {
+      visibility: hidden;
+    }
+
+
+    .posts-container {
+      left: 20%;
+      row-gap: 1em;
+    }
+
+    .about-container, .post-container {
+      height: 115px;
+      width: 95%;
+    }
+
+    .profile-container {
+      height: 30%;
+      width: 17%;
+    }
+
+    .about-container,
+    .admin-container {
+      height: 55%;
+    }
+
+    .about-container {
+      width: 78%;
     }
   }

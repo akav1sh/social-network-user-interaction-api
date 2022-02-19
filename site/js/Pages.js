@@ -228,7 +228,8 @@ class Header extends React.Component {
 	render() {
 		let admin, msg_bell, pst_bell;
 		if (this.props.u_id === "1")
-			admin = React.createElement("div", { className: "admin", id: "admin", onClick: this.handle_admin });
+			admin = React.createElement("div", { className: "admin", id: "admin", onClick: this.handle_admin },
+					React.createElement("span", { className: "tooltiptext" }, "Admin"));
 		if (this.props.msg_bell)
 			msg_bell = React.createElement("div", { className: "notification" });
 		if (this.props.pst_bell)
@@ -239,7 +240,7 @@ class Header extends React.Component {
 			{ className: "header", id: "header" },
 			React.createElement(
 				"div",
-				{ className: "header-icon", id: "header-icon", onClick: this.handle_posts }
+				{ className: "header-icon", id: "header-icon", onClick: this.handle_posts },
 			),
 			React.createElement(
 				"div",
@@ -248,20 +249,40 @@ class Header extends React.Component {
 				React.createElement(
 					"div",
 					{ className: "posts", id: "posts", onClick: this.handle_posts },
-					pst_bell
+					pst_bell,
+					React.createElement(
+						"span",
+						{ className: "tooltiptext" },
+						"Posts"
+					)
 				),
 				React.createElement(
 					"div",
 					{ className: "messages", id: "messages", onClick: this.handle_messages },
-					msg_bell
+					msg_bell,
+					React.createElement(
+						"span",
+						{ className: "tooltiptext" },
+						"Messages"
+					)
 				),
 				React.createElement(
 					"div",
 					{ className: "about", id: "about", onClick: this.handle_about },
+					React.createElement(
+						"span",
+						{ className: "tooltiptext" },
+						"About us"
+					)
 				),
 				React.createElement(
 					"div",
 					{ className: "logout", id: "logout", onClick: this.handle_logout },
+					React.createElement(
+						"span",
+						{ className: "tooltiptext" },
+						"Log out"
+					)
 				)
 			)
 		);
@@ -296,9 +317,8 @@ class Homepage extends React.Component {
 			page_layout = React.createElement("div", null,
 				React.createElement("div", { className: "posts-container", id: "posts-container" },
 				React.createElement(NewPost, { get_posts: this.props.get_posts.bind(this), u_id: this.props.u_id, full_name: this.props.full_name }),
-				this.props.user_post ? React.createElement(Post, { post: this.props.user_post }) : null,
-				posts ? posts.reverse() : 
-				React.createElement(Post)));
+				this.props.user_post ? React.createElement(Post, { post: this.props.user_post, user: true }) : null,
+				posts ? posts.reverse() : React.createElement(Post)));
 		}
 
 		return page_layout;
@@ -405,7 +425,7 @@ class AdminPage extends React.Component {
                 res.json()
 				.then((data) => {
 					if (data.users[0]) 
-						this.setState((_prev_state) => ({ loading: false, users: data.users, original_list: data.users }));
+						this.setState((_prev_state) => ({ loading: false, original_list: data.users }));
 				});
             } else {
                 this.props.change_page("register");
@@ -415,18 +435,19 @@ class AdminPage extends React.Component {
 
 	render() {
 		let page_layout;
+		
 		if (this.state.loading) {
 			page_layout = React.createElement("div", null,
 			React.createElement("div", { className: "posts-container", id: "posts-container" },
 			React.createElement(Post, { post: "loading" }),
 			React.createElement(Post, { post: "loading" }),
-			React.createElement(Post, { post: "loading" })));
+			React.createElement(Post, { post: "loading" })));	
 		} else {
 			page_layout = React.createElement("div", null,
 			React.createElement("div", { className: "posts-container" },
 			React.createElement(Broadcast),
 			React.createElement(UserStatus, { refresh_userlist: this.get_users_list.bind(this) }),
-			React.createElement(UsersList, { users: this.state.users, original_list: this.state.original_list })));
+			React.createElement(UsersList, { original_list: this.state.original_list })));
 		}
 		return page_layout;
 	}

@@ -6,19 +6,22 @@ class NewPost extends React.Component {
     handle_post = e => {
 		e.preventDefault();
 
-		create_post(e.target.post.value)
-		.then((res) => {
-			if (res.ok) {
-				alert("Post successfull");
-                this.props.get_posts(this.props.u_id, this.props.full_name);
-			} else {
-				res.json().then(data => {
-					alert(data.error);
-				});
-			}
-			e.target.post.value = "";
-		}).catch();
-
+        if (!e.target.post.value)
+            alert("Can't post an empty post")
+        else {
+            create_post(e.target.post.value)
+            .then((res) => {
+                if (res.ok) {
+                    alert("Post successfull");
+                    this.props.get_posts(this.props.u_id, this.props.full_name);
+                } else {
+                    res.json().then(data => {
+                        alert(data.error);
+                    });
+                }
+                e.target.post.value = "";
+            }).catch();
+        }
 	}
 
     render() {
@@ -63,6 +66,12 @@ class Post extends React.Component {
         let layout;
         if (this.props.post === "loading") {
             layout = React.createElement("img", { src: "css/images/animation.gif", alt: "Italian Trulli" });
+        } else if (this.props.user) {
+            const timestamp = new Date(this.props.post.time);
+            layout = React.createElement("div", { className: "post-container" },
+            React.createElement("div", { className: "post-text" }, "My last post:",
+            React.createElement("div", { className: "text-container" }, this.props.post.text),
+            React.createElement("div", { className: "time-text" }, "Time: " + timestamp.toLocaleString('he-IL') + "\u2003Post ID: " + this.props.post.p_id)));
         } else if (this.props.post) {
             const timestamp = new Date(this.props.post.time);
             layout = React.createElement("div", { className: "post-container" },
@@ -86,20 +95,25 @@ class NewMessage extends React.Component {
     handle_message = e => {
 		e.preventDefault(e.target.id.value);
 
-		send_message(e.target.id.value, e.target.message.value)
-		.then((res) => {
-			if (res.ok) {
-				alert("Message successfull");
-                this.props.update_page();
-			} else {
-				res.json().then(data => {
-					alert(data.error);
-				});
-			}
-			e.target.id.value = "";
-            e.target.message.value = "";
-		}).catch();
-
+        if (!e.target.message.value)
+            alert("Can't send empty message")
+        else if (!e.target.id.value)
+            alert("Can't send message without id")
+        else {
+            send_message(e.target.id.value, e.target.message.value)
+            .then((res) => {
+                if (res.ok) {
+                    alert("Message successfull");
+                    this.props.update_page();
+                } else {
+                    res.json().then(data => {
+                        alert(data.error);
+                    });
+                }
+                e.target.id.value = "";
+                e.target.message.value = "";
+            }).catch();
+        }
 	}
 
     render() {
@@ -148,19 +162,22 @@ class Broadcast extends React.Component {
 
     handle_message = e => {
 		e.preventDefault(e.target.id.value);
-
-		broadcast_message(e.target.broadcast.value)
-		.then((res) => {
-			if (res.ok) {
-				alert("Broadcast successfull");
-			} else {
-				res.json().then(data => {
-					alert(data.error);
-				});
-			}
-            e.target.broadcast.value = "";
-		}).catch();
-
+        
+        if (!e.target.id.value)
+            alert("Can't send empty broadcast")
+        else {
+            broadcast_message(e.target.broadcast.value)
+            .then((res) => {
+                if (res.ok) {
+                    alert("Broadcast successfull");
+                } else {
+                    res.json().then(data => {
+                        alert(data.error);
+                    });
+                }
+                e.target.broadcast.value = "";
+            }).catch();
+        }
 	}
 
     render() {
@@ -306,12 +323,15 @@ class User extends React.Component {
 class UsersList extends React.Component {
     constructor(props) {
 		super(props);
+        this.state = {
+            users: this.props.original_list
+        }
 	}
 
     handle_users = e => {
 		e.preventDefault(e.target.id.value);
 		let new_users_list;
-        if (this.props.users) {
+        if (this.props.original_list) {
             switch(e.nativeEvent.submitter.name) {
                 case 'search':
                     new_users_list = this.props.original_list.filter(user => user.u_id === e.target.id.value);
@@ -334,75 +354,110 @@ class UsersList extends React.Component {
             }
         }
         e.target.id.value = "";
-        this.props.users = new_users_list;
+        this.setState((_prev_state) => ({ users: new_users_list }));
 	}
 
     render() {
         let layout, users;
         
-        if (this.props.users) {
-            users = this.props.users.map((user, i) => {
+        if (this.state.users) {
+            users = this.state.users.map((user, i) => {
                 return React.createElement(User, { key: i, user: user }) 
                 });
         }
-
-        layout = React.createElement(
-            "div",
-            { className: "post-container admin-container", id: "write-post" },
-            React.createElement(
-                "form",
-                { className: "form", onSubmit: this.handle_users },
-            React.createElement(
+        
+        if (window.innerWidth <= 760) {
+            layout = React.createElement(
                 "div",
-                { className: "post-text" },
-                "Users List:"
+                { className: "post-container admin-container", id: "write-post" },
+                React.createElement(
+                    "form",
+                    { className: "form", onSubmit: this.handle_users },
+                React.createElement(
+                    "div",
+                    { className: "post-text" },
+                    "Users List:"
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "flex-box" },
+                        React.createElement(
+                            "div",
+                            { className: "input-group" },
+                            React.createElement("input",
+                            { className: "post-input", type: "text", name: "id", placeholder: "User ID" })
+                        ),
+                        React.createElement(
+                            "button",
+                            { className: "secondary", name: "search"},
+                            "Search"
+                        ),	
+                    ),
                 ),
                 React.createElement(
                     "div",
-                    { className: "flex-box" },
+                    { className: "user-container" },
+                    users)
+            );
+        } else {
+            layout = React.createElement(
+                "div",
+                { className: "post-container admin-container", id: "write-post" },
+                React.createElement(
+                    "form",
+                    { className: "form", onSubmit: this.handle_users },
+                React.createElement(
+                    "div",
+                    { className: "post-text" },
+                    "Users List:"
+                    ),
                     React.createElement(
                         "div",
-                        { className: "input-group" },
-                        React.createElement("input",
-                        { className: "post-input", type: "text", name: "id", placeholder: "User ID" })
+                        { className: "flex-box" },
+                        React.createElement(
+                            "div",
+                            { className: "input-group" },
+                            React.createElement("input",
+                            { className: "post-input", type: "text", name: "id", placeholder: "User ID" })
+                        ),
+                        React.createElement(
+                            "button",
+                            { className: "secondary", name: "search"},
+                            "Search"
+                        ),
+                        React.createElement(
+                            "button",
+                            { className: "secondary", name: "created" },
+                            "Created"
+                        ),
+                        React.createElement(
+                            "button",
+                            { className: "secondary", name: "active" },
+                            "Active"
+                        ),
+                        React.createElement(
+                            "button",
+                            { className: "secondary", name: "suspended" },
+                            "Suspended"
+                        ),
+                        React.createElement(
+                            "button",
+                            { className: "secondary", name: "deleted" },
+                            "Deleted"
+                        ),
+                        React.createElement(
+                            "button",
+                            { className: "secondary", name: "all" },
+                            "All"
+                        ),	
                     ),
-                    React.createElement(
-                        "button",
-                        { className: "secondary", name: "search"},
-                        "Search"
-                    ),
-                    React.createElement(
-                        "button",
-                        { className: "secondary", name: "created" },
-                        "Created"
-                    ),
-                    React.createElement(
-                        "button",
-                        { className: "secondary", name: "active" },
-                        "Active"
-                    ),
-                    React.createElement(
-                        "button",
-                        { className: "secondary", name: "suspended" },
-                        "Suspended"
-                    ),
-                    React.createElement(
-                        "button",
-                        { className: "secondary", name: "deleted" },
-                        "Deleted"
-                    ),
-                    React.createElement(
-                        "button",
-                        { className: "secondary", name: "all" },
-                        "All"
-                    ),	
                 ),
-            ),
-            React.createElement(
-                "div",
-                { className: "user-container" },
-                users)
-        );
+                React.createElement(
+                    "div",
+                    { className: "user-container" },
+                    users)
+            );
+        }
     
         return layout;
     }

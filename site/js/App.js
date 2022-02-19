@@ -121,7 +121,7 @@ class App extends React.Component {
 			.then((res_user) => {
 				if (res_user.ok) {
 					res_user.json().then((data_user) => {
-						get_post(0, 4)
+						get_post(0, 3)
 						.then((res_posts) => {
 							if (res_posts.ok) {
 								res_posts.json().then((data_posts) => {
@@ -143,13 +143,15 @@ class App extends React.Component {
 									this.handle_homepage(id, name, user_post, posts)
 								});
 							} else {
-								this.change_page("register");
+								if (post_res.statusText === "Forbidden")
+									this.change_page("register")
 							}
 						}).catch();
 					});
 				} else {
-					this.change_page("register")
-				}
+					if (post_res.statusText === "Forbidden")
+						this.change_page("register")
+					}
 			}).catch();
 		}
     }
