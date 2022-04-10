@@ -155,7 +155,16 @@ class Register extends React.Component {
 				React.createElement(
 				  "label",
 				  { htmlFor: "password" },
-				  "Password"
+				  "Password",
+				  React.createElement(
+					"div",
+					{ className: "info", id: "info" },
+					React.createElement(
+						"span",
+						{ className: "tooltiptext info-tooltip" },
+						"Password should be at least 8 characters and should contain at least one capital letter, one small letter and one digit."
+					)
+				),
 				),
 				React.createElement("input", { type: "password", name: "password" })
 			  ),

@@ -360,7 +360,17 @@ button.secondary:hover {
     top: -10px;
     right: 20px;
   }
+
+  .info-tooltip {
+    background-color: #41b3a3;
+    color: #ffffff;
+    width: 130px;
+    top: 8px;
+    right: -122px;
+  }
   
+  .info:hover .info-tooltip,
+  .info:hover .tooltiptext,
   .admin:hover .tooltiptext,
   .posts:hover .tooltiptext,
   .messages:hover .tooltiptext,
@@ -428,7 +438,17 @@ button.secondary:hover {
     background-size: cover;
     transition: filter 0.8s;
   }
-   
+  
+  .info {
+    filter: opacity(0.6);
+    background-image: url(/css/images/info.png);
+    height: 17px;
+    width: 17px;
+    background-size: cover;
+    transition: filter 0.8s;
+  }
+
+  .info:hover,
   .logout:hover,
   .about:hover,
   .messages:hover,
